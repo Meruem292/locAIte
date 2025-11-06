@@ -5,7 +5,6 @@ export function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 text-primary">
       <Image src="/locaiteLogo.jpg" alt="LocAIte Logo" width={32} height={32} className="h-8 w-8" />
-      <span className="text-2xl font-bold font-headline">LocAIte</span>
     </Link>
   );
 }
