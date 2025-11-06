@@ -10,28 +10,28 @@ export function MobileNav() {
 
   return (
     <>
-      <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+      <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} className="text-primary-foreground">
         <Menu className="h-6 w-6" />
         <span className="sr-only">Open Menu</span>
       </Button>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background p-6">
+        <div className="fixed inset-0 z-50 flex flex-col bg-background p-6" style={{ backgroundColor: '#134686' }}>
           <div className="flex items-center justify-between">
             <Logo />
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-primary-foreground">
               <X className="h-6 w-6" />
               <span className="sr-only">Close Menu</span>
             </Button>
           </div>
           <nav className="mt-12 flex flex-col items-center gap-8 text-lg">
-            <Link href="#features" onClick={() => setIsOpen(false)} className="text-foreground/80 transition-colors hover:text-foreground">
+            <Link href="#features" onClick={() => setIsOpen(false)} className="text-primary-foreground/80 transition-colors hover:text-primary-foreground">
               Features
             </Link>
             <div className="flex flex-col items-center gap-4 w-full mt-8">
-              <Button variant="ghost" asChild className="w-full">
+              <Button variant="ghost" asChild className="w-full text-primary-foreground hover:bg-primary-foreground/10">
                 <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>
               </Button>
-              <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Link href="/signup" onClick={() => setIsOpen(false)}>Sign Up</Link>
               </Button>
             </div>
