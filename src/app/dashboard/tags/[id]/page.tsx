@@ -35,7 +35,7 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <Button variant="ghost" asChild className="mb-4">
+      <Button variant="outline" asChild className="mb-6">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to all tags
@@ -43,9 +43,9 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
       </Button>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-primary/5">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <CardTitle className="text-3xl font-bold font-headline text-primary mb-2">{tag.name}</CardTitle>
                   <Badge variant={getBadgeVariant(tag.status)}>{tag.status}</Badge>
@@ -54,24 +54,24 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
                   <Image
                     src={tagImage.imageUrl}
                     alt={tagImage.description}
-                    width={60}
-                    height={60}
-                    className="rounded-lg border"
+                    width={80}
+                    height={80}
+                    className="rounded-lg border-2 p-1"
                     data-ai-hint={tagImage.imageHint}
                   />
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="space-y-4 text-muted-foreground">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">Last known location</p>
                     <p>{tag.currentLocation.address}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Battery className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">Battery</p>

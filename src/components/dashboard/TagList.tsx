@@ -33,7 +33,7 @@ export function TagList({ tags }: TagListProps) {
         return (
           <Link href={`/dashboard/tags/${tag.id}`} key={tag.id} className="group">
             <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 bg-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-lg font-medium">{tag.name}</CardTitle>
                 {tagImage && (
                   <Image
@@ -41,22 +41,22 @@ export function TagList({ tags }: TagListProps) {
                     alt={tagImage.description}
                     width={40}
                     height={40}
-                    className="rounded-lg"
+                    className="rounded-lg border"
                     data-ai-hint={tagImage.imageHint}
                   />
                 )}
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col justify-between">
+              <CardContent className="flex-grow flex flex-col justify-between pt-0">
                 <div>
                   <Badge variant={getBadgeVariant(tag.status)}>
                     {tag.status}
                   </Badge>
-                  <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
-                    <MapPin className="h-4 w-4" /> {tag.currentLocation.address}
+                  <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" /> {tag.currentLocation.address}
                   </p>
                 </div>
-                <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
+                <div className="flex justify-between items-center mt-4 pt-4 border-t text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
                     <Battery className="h-4 w-4"/> {tag.battery}%
                   </div>
                   <ChevronRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />

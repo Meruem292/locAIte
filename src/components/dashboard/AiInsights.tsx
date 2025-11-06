@@ -7,6 +7,7 @@ import { predictTagLocation, PredictTagLocationOutput } from "@/ai/flows/predict
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BrainCircuit, Loader2, Sparkles, LocateFixed, History } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type AiInsightsProps = {
   tag: Tag;
@@ -51,20 +52,20 @@ export function AiInsights({ tag }: AiInsightsProps) {
   };
 
   return (
-    <Card className="sticky top-24">
-      <CardHeader>
-        <div className="flex items-center gap-2">
+    <Card className="sticky top-24 shadow-lg">
+      <CardHeader className="bg-accent/10">
+        <div className="flex items-center gap-3">
           <Sparkles className="h-6 w-6 text-accent" />
-          <CardTitle className="font-headline">AI Insights</CardTitle>
+          <CardTitle className="font-headline text-primary">AI Insights</CardTitle>
         </div>
         <CardDescription>
           Let AI help you understand your tag's patterns.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="p-6 space-y-6">
         <div>
-          <h4 className="font-semibold mb-2 flex items-center gap-2"><History className="h-4 w-4"/> Location Summary</h4>
-          <Button onClick={handleSummarize} disabled={isSummaryLoading} className="w-full">
+          <h4 className="font-semibold mb-3 flex items-center gap-2"><History className="h-4 w-4"/> Location Summary</h4>
+          <Button onClick={handleSummarize} disabled={isSummaryLoading} className="w-full" variant="outline">
             {isSummaryLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -78,9 +79,12 @@ export function AiInsights({ tag }: AiInsightsProps) {
             </div>
           )}
         </div>
+
+        <Separator />
+
         <div>
-          <h4 className="font-semibold mb-2 flex items-center gap-2"><LocateFixed className="h-4 w-4" /> Location Prediction</h4>
-          <Button onClick={handlePredict} disabled={isPredictionLoading} className="w-full">
+          <h4 className="font-semibold mb-3 flex items-center gap-2"><LocateFixed className="h-4 w-4" /> Location Prediction</h4>
+          <Button onClick={handlePredict} disabled={isPredictionLoading} className="w-full" variant="outline">
             {isPredictionLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -90,9 +94,9 @@ export function AiInsights({ tag }: AiInsightsProps) {
           </Button>
           {prediction && !isPredictionLoading && (
             <div className="mt-4 text-sm p-4 bg-secondary rounded-lg border space-y-2">
-              <p><span className="font-semibold">Reason:</span> {prediction.predictedLocation.reason}</p>
-              <p><span className="font-semibold">Confidence:</span> {Math.round(prediction.predictedLocation.confidence * 100)}%</p>
-              <p><span className="font-semibold">Location:</span> Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}</p>
+              <p><span className="font-semibold text-foreground">Reason:</span> {prediction.predictedLocation.reason}</p>
+              <p><span className="font-semibold text-foreground">Confidence:</span> {Math.round(prediction.predictedLocation.confidence * 100)}%</p>
+              <p><span className="font-semibold text-foreground">Location:</span> Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}</p>
             </div>
           )}
         </div>

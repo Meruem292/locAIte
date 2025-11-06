@@ -20,22 +20,17 @@ const featureList = [
 
 export function Features() {
   return (
-    <section id="features" className="w-full py-20 md:py-32">
+    <section id="features" className="w-full bg-primary/5 py-20 md:py-32">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex flex-col items-center text-center space-y-4 mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">How LocAIte Works</h2>
+        <div className="mb-16 flex flex-col items-center space-y-4 text-center">
+          <h2 className="text-3xl font-bold text-primary md:text-4xl font-headline">How LocAIte Works</h2>
           <p className="max-w-2xl text-lg text-foreground/70">
             A seamless blend of cutting-edge hardware and intelligent software.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid gap-12 md:grid-cols-2">
           {featureList.map((feature, index) => (
-            <Card key={index} className="overflow-hidden border-2 border-transparent hover:border-accent/50 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-card/50">
-              <CardHeader className="p-8">
-                 <div className="bg-primary/10 rounded-full p-3 w-fit mb-4">{feature.icon}</div>
-                <CardTitle className="text-2xl font-bold font-headline text-primary">{feature.title}</CardTitle>
-                <CardDescription className="text-base pt-2">{feature.description}</CardDescription>
-              </CardHeader>
+            <Card key={index} className="transform-gpu overflow-hidden border-2 border-transparent bg-card/50 shadow-lg transition-all duration-300 hover:border-accent/50 hover:shadow-2xl hover:-translate-y-2">
               <CardContent className="p-0">
                 {feature.image && (
                   <Image
@@ -43,11 +38,16 @@ export function Features() {
                     alt={feature.image.description}
                     width={600}
                     height={400}
-                    className="object-cover w-full h-64"
+                    className="h-64 w-full object-cover"
                     data-ai-hint={feature.image.imageHint}
                   />
                 )}
               </CardContent>
+              <CardHeader className="p-8">
+                 <div className="mb-4 w-fit rounded-full bg-primary/10 p-3">{feature.icon}</div>
+                <CardTitle className="text-2xl font-bold text-primary font-headline">{feature.title}</CardTitle>
+                <CardDescription className="pt-2 text-base">{feature.description}</CardDescription>
+              </CardHeader>
             </Card>
           ))}
         </div>
