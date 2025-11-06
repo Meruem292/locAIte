@@ -9,7 +9,7 @@ export function Hero() {
 
   return (
     <section className="relative w-full overflow-hidden bg-card">
-      <div className="container mx-auto grid min-h-[calc(100vh-4rem)] items-center px-4 md:grid-cols-2 md:px-6">
+      <div className="container mx-auto grid items-center gap-8 px-4 py-20 md:grid-cols-2 md:px-6 lg:py-28">
         <div className="z-10 flex flex-col items-start space-y-6">
           <h1 className="text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl lg:text-7xl font-headline">
             Never Lose Anything Again.
@@ -37,8 +37,8 @@ export function Hero() {
             <Image
               src={heroImage.imageUrl}
               alt={heroImage.description}
-              width={1200}
-              height={800}
+              width={800}
+              height={533}
               className="rounded-xl object-contain shadow-2xl"
               data-ai-hint={heroImage.imageHint}
               priority
