@@ -1,0 +1,103 @@
+import { tags } from "@/lib/data";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Battery, MapPin, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { MapMock } from "@/components/dashboard/MapMock";
+import { AiInsights } from "@/components/dashboard/AiInsights";
+
+export default function TagDetailPage({ params }: { params: { id: string } }) {
+  const tag = tags.find((t) => t.id === params.id);
+
+  if (!tag) {
+    notFound();
+  }
+
+  const tagImage = PlaceHolderImages.find((p) => p.id === tag.image);
+  const mapImage = PlaceHolderImages.find((p) => p.id === 'map-mock');
+
+  const getBadgeVariant = (status: typeof tag.status) => {
+    switch (status) {
+      case 'With You':
+        return 'default';
+      case 'Nearby':
+        return 'secondary';
+      case 'Far':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  }
+
+  return (
+    <div>
+      <Button variant="ghost" asChild className="mb-4">
+        <Link href="/dashboard">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to all tags
+        </Link>
+      </Button>
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-8">
+          <Card>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-3xl font-bold font-headline text-primary mb-2">{tag.name}</CardTitle>
+                  <Badge variant={getBadgeVariant(tag.status)}>{tag.status}</Badge>
+                </div>
+                {tagImage && (
+                  <Image
+                    src={tagImage.imageUrl}
+                    alt={tagImage.description}
+                    width={60}
+                    height={60}
+                    className="rounded-lg border"
+                    data-ai-hint={tagImage.imageHint}
+                  />
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium text-foreground">Last known location</p>
+                    <p>{tag.currentLocation.address}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Battery className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium text-foreground">Battery</p>
+                    <p>{tag.battery}%</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+             <CardHeader>
+              <CardTitle>Location on Map</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {mapImage && (
+                <MapMock imageUrl={mapImage.imageUrl} description={mapImage.description} />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+          <AiInsights tag={tag} />
+        </div>
+      </div>
+    </div>
+  );
+}

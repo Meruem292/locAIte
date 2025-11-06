@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "A person looking at their phone with a map interface.",
+      "imageUrl": "https://images.unsplash.com/photo-1604357209793-fca5dca89f97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwaG9uZSUyMG1hcHxlbnwwfHx8fDE3NjIzOTg2MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "phone map"
+    },
+    {
+      "id": "feature-gps",
+      "description": "A satellite in orbit above the earth.",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1574848487348-533aaf72833e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzYXRlbGxpdGUlMjBlYXJ0aHxlbnwwfHx8fDE3NjIzOTg2MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "satellite earth"
+    },
+    {
+      "id": "feature-ai",
+      "description": "Abstract visualization of a neural network.",
+      "imageUrl": "https://images.unsplash.com/photo-1597733336794-12d05021d510?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxuZXVyYWwlMjBuZXR3b3JrfGVufDB8fHx8MTc2MjMzNzI0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "neural network"
+    },
+    {
+      "id": "map-mock",
+      "description": "A city map view from above.",
+      "imageUrl": "https://images.unsplash.com/photo-1619468129361-605ebea04b44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaXR5JTIwbWFwfGVufDB8fHx8MTc2MjM3MDg3OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city map"
+    },
+    {
+      "id": "tag-keys",
+      "description": "A set of keys with a smart tag attached.",
+      "imageUrl": "https://images.unsplash.com/photo-1553343748-078b4030bf9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxrZXlzJTIwdGFnfGVufDB8fHx8MTc2MjM5ODYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "keys tag"
+    },
+    {
+      "id": "tag-wallet",
+      "description": "A leather wallet with a smart tag inside.",
+      "imageUrl": "https://images.unsplash.com/photo-1661353562180-d09ea8a0cd1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YWxsZXQlMjB0YWd8ZW58MHx8fHwxNzYyMzk4NjIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wallet tag"
+    },
+    {
+      "id": "tag-backpack",
+      "description": "A backpack with a smart tag clipped to it.",
+      "imageUrl": "https://images.unsplash.com/photo-1711024818943-a4aa01ae8f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiYWNrcGFjayUyMHRhZ3xlbnwwfHx8fDE3NjIzOTg2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "backpack tag"
+    }
+  ]
 }
