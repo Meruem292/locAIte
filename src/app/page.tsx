@@ -6,7 +6,7 @@ import { CTA } from "@/components/landing/CTA";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen animate-in fade-in-0 duration-1000">
       <Header />
       <main className="flex-1">
         <Hero />
