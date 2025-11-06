@@ -67,7 +67,7 @@ function useAuth() {
   const { auth } = useFirebase();
   const user = useUser(auth);
 
-  return useMemo(() => ({ ...auth, user }), [auth, user]);
+  return useMemo(() => ({ auth, user }), [auth, user]);
 }
 
 function useFirestore() {

@@ -18,7 +18,7 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 export function DashboardHeader() {
-  const { user, ...auth } = useAuth();
+  const { auth, user } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {

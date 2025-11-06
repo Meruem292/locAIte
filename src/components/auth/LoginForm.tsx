@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
-import { useAuth } from "@/firebase";
+import { useFirebase } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -20,7 +20,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
-  const auth = useAuth();
+  const { auth } = useFirebase();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
