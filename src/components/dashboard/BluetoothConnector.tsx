@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bluetooth, Loader2, XCircle, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -16,82 +16,6 @@ export function BluetoothConnector() {
   const [location, setLocation] = useState<{ lat: number; lon: number } | string | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const handleConnect = async () => {
-    if (!navigator.bluetooth) {
-      toast({
-        variant: 'destructive',
-        title: 'Web Bluetooth API not available',
-        description: 'Your browser does not support the Web Bluetooth API. Please use a compatible browser like Chrome.',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const requestedDevice = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [SERVICE_UUID] }],
-      });
-
-      setIsLoading(false);
-      setDevice(requestedDevice);
-      toast({
-        title: 'Device Selected',
-        description: `Connecting to: ${requestedDevice.name || `ID: ${requestedDevice.id}`}`,
-      });
-
-      // Add listener for disconnection
-      requestedDevice.addEventListener('gattserverdisconnected', onDisconnected);
-
-      const gattServer = await requestedDevice.gatt?.connect();
-      if (!gattServer) {
-        throw new Error("Could not connect to GATT server.");
-      }
-      setServer(gattServer);
-
-      const service = await gattServer.getPrimaryService(SERVICE_UUID);
-      const characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
-      await characteristic.startNotifications();
-      characteristic.addEventListener('characteristicvaluechanged', handleLocationUpdate);
-      
-      // Read initial value
-      const value = await characteristic.readValue();
-      handleLocationUpdate({ target: value } as any);
-
-    } catch (error: any) {
-      setIsLoading(false);
-      if (error.name === 'NotFoundError') {
-        toast({
-          variant: 'destructive',
-          title: 'No Device Selected',
-          description: 'You did not select a Bluetooth device.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Bluetooth Connection Error',
-          description: error.message || 'An unknown error occurred.',
-        });
-      }
-    }
-  };
-
-  const onDisconnected = () => {
-    toast({
-      title: 'Device Disconnected',
-      description: `Disconnected from ${device?.name || `ID: ${device?.id}`}`,
-    });
-    setDevice(null);
-    setServer(null);
-    setLocation(null);
-    setDeviceId(null);
-  };
-  
-  const handleDisconnect = () => {
-    server?.disconnect();
-    // The onDisconnected event listener will handle the state cleanup.
-  }
 
   const handleLocationUpdate = (event: any) => {
     const value = event.target.value as DataView;
@@ -116,7 +40,6 @@ export function BluetoothConnector() {
       }
     } else {
         // Handle other messages like "Waiting for GPS..." or "No GPS signal"
-        // We'll extract just the message part
         const messageMatch = text.match(/, (.*)$/);
         if (messageMatch && messageMatch[1]) {
             setLocation(messageMatch[1]);
@@ -125,21 +48,119 @@ export function BluetoothConnector() {
         }
     }
   };
+
+  const connectToDevice = useCallback(async (deviceToConnect: BluetoothDevice) => {
+    setIsLoading(true);
+    setDevice(deviceToConnect);
+    toast({
+      title: 'Device Found',
+      description: `Connecting to: ${deviceToConnect.name || `ID: ${deviceToConnect.id}`}`,
+    });
+
+    deviceToConnect.addEventListener('gattserverdisconnected', onDisconnected);
+
+    try {
+      const gattServer = await deviceToConnect.gatt?.connect();
+      if (!gattServer) {
+        throw new Error("Could not connect to GATT server.");
+      }
+      setServer(gattServer);
+
+      const service = await gattServer.getPrimaryService(SERVICE_UUID);
+      const characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', handleLocationUpdate);
+      
+      // Read initial value
+      const value = await characteristic.readValue();
+      handleLocationUpdate({ target: value } as any);
+      setIsLoading(false);
+      return true;
+    } catch (error: any) {
+        setIsLoading(false);
+        setDevice(null);
+        toast({
+            variant: 'destructive',
+            title: 'Connection Failed',
+            description: error.message || `Could not connect to ${deviceToConnect.name || deviceToConnect.id}.`,
+        });
+        return false;
+    }
+  }, [toast]);
+
+  const onDisconnected = useCallback(() => {
+    toast({
+      title: 'Device Disconnected',
+      description: `Disconnected from ${device?.name || `ID: ${device?.id}`}`,
+    });
+    setDevice(null);
+    setServer(null);
+    setLocation(null);
+    setDeviceId(null);
+  }, [device, toast]);
+
+  const handleManualConnect = async () => {
+    if (!navigator.bluetooth) {
+      toast({
+        variant: 'destructive',
+        title: 'Web Bluetooth API not available',
+        description: 'Your browser does not support the Web Bluetooth API. Please use a compatible browser like Chrome.',
+      });
+      return;
+    }
+
+    try {
+      const requestedDevice = await navigator.bluetooth.requestDevice({
+        filters: [{ services: [SERVICE_UUID] }],
+      });
+      await connectToDevice(requestedDevice);
+    } catch (error: any) {
+      if (error.name !== 'NotFoundError') {
+         toast({
+          variant: 'destructive',
+          title: 'Bluetooth Scan Error',
+          description: error.message || 'An unknown error occurred during device scan.',
+        });
+      }
+    }
+  };
+  
+  const handleDisconnect = () => {
+    server?.disconnect();
+  }
   
   useEffect(() => {
+    const autoConnect = async () => {
+        if (navigator.bluetooth && typeof navigator.bluetooth.getDevices === 'function') {
+            try {
+                const permittedDevices = await navigator.bluetooth.getDevices();
+                const knownDevice = permittedDevices.find(d => d.name?.includes('ESP32')); // Or a more specific check
+                
+                if (knownDevice) {
+                    await connectToDevice(knownDevice);
+                }
+            } catch (error) {
+                console.error("Error during auto-connect:", error);
+            }
+        }
+    };
+    autoConnect();
+  }, [connectToDevice]);
+
+  useEffect(() => {
     return () => {
-      // Cleanup on component unmount
       if (device) {
           device.removeEventListener('gattserverdisconnected', onDisconnected);
           server?.disconnect();
       }
     }
-  }, [device, server]);
+  }, [device, server, onDisconnected]);
 
   return (
     <div className="flex flex-col items-start gap-4">
       {!device ? (
-        <Button onClick={handleConnect} disabled={isLoading} variant="outline">
+        <Button onClick={handleManualConnect} disabled={isLoading} variant="outline">
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
