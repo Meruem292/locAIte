@@ -8,16 +8,16 @@ export function Hero() {
 
   return (
     <section
-      className="relative w-full h-[60vh] md:h-[70vh] bg-cover bg-fixed bg-center"
+      className="relative w-full h-[calc(100vh-4rem)] bg-cover bg-fixed bg-center"
       style={{ backgroundImage: `url(${heroImage?.imageUrl})` }}
     >
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-black/60" />
       <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center text-center">
         <div className="flex flex-col items-center space-y-6">
-          <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl font-headline">
+          <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl font-headline">
             Never Lose Anything Again.
           </h1>
-          <p className="max-w-2xl text-lg text-white/90 md:text-xl">
+          <p className="max-w-3xl text-lg text-white/90 md:text-xl">
             LocAIte combines precise GPS tracking with predictive AI to not only show you where your things are, but where they're likely to be.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">

@@ -27,12 +27,6 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         <Logo />
         
-        <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="#features" className={cn("transition-colors hover:text-primary-foreground/80", scrolled ? "text-foreground/60 hover:text-foreground" : "text-primary-foreground/80 hover:text-primary-foreground")}>
-            Features
-          </Link>
-        </nav>
-
         <div className="hidden md:flex items-center gap-4">
           <Button variant="ghost" asChild className={cn("hover:bg-primary-foreground/10", scrolled ? "text-foreground hover:bg-accent hover:text-accent-foreground" : "text-primary-foreground hover:bg-primary-foreground/10")}>
             <Link href="/login">Login</Link>

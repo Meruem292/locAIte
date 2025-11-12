@@ -29,9 +29,6 @@ export function MobileNav({ scrolled }: MobileNavProps) {
             </Button>
           </div>
           <nav className="mt-12 flex flex-col items-center gap-8 text-lg">
-            <Link href="#features" onClick={() => setIsOpen(false)} className="text-foreground/80 transition-colors hover:text-foreground">
-              Features
-            </Link>
             <div className="flex flex-col items-center gap-4 w-full mt-8">
               <Button variant="ghost" asChild className="w-full text-foreground hover:bg-accent">
                 <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>
