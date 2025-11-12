@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Bluetooth, Loader2, XCircle } from 'lucide-react';
+import { Bluetooth, Loader2, XCircle, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // From your ESP32 code
@@ -14,6 +14,7 @@ export function BluetoothConnector() {
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [server, setServer] = useState<BluetoothRemoteGATTServer | null>(null);
   const [location, setLocation] = useState<{ lat: number; lon: number } | string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleConnect = async () => {
@@ -84,6 +85,7 @@ export function BluetoothConnector() {
     setDevice(null);
     setServer(null);
     setLocation(null);
+    setDeviceId(null);
   };
   
   const handleDisconnect = () => {
@@ -96,21 +98,31 @@ export function BluetoothConnector() {
     const decoder = new TextDecoder('utf-8');
     const text = decoder.decode(value);
 
-    // Based on your new ESP32 code: "Lat: [latitude], Lon: [longitude]"
+    // Format: "Device: L-001, Lat: x.xxxxxx, Lon: y.yyyyyy"
+    const deviceIdMatch = text.match(/Device: ([\w-]+)/);
+    if (deviceIdMatch && deviceIdMatch[1]) {
+      setDeviceId(deviceIdMatch[1]);
+    }
+
     if (text.includes('Lat:') && text.includes('Lon:')) {
-      const parts = text.split(',');
-      const latStr = parts[0].split(':')[1]?.trim();
-      const lonStr = parts[1].split(':')[1]?.trim();
+      const latMatch = text.match(/Lat: ([\d.-]+)/);
+      const lonMatch = text.match(/Lon: ([\d.-]+)/);
       
-      const lat = parseFloat(latStr);
-      const lon = parseFloat(lonStr);
+      const lat = latMatch ? parseFloat(latMatch[1]) : NaN;
+      const lon = lonMatch ? parseFloat(lonMatch[1]) : NaN;
       
       if (!isNaN(lat) && !isNaN(lon)) {
         setLocation({ lat, lon });
       }
     } else {
         // Handle other messages like "Waiting for GPS..." or "No GPS signal"
-        setLocation(text);
+        // We'll extract just the message part
+        const messageMatch = text.match(/, (.*)$/);
+        if (messageMatch && messageMatch[1]) {
+            setLocation(messageMatch[1]);
+        } else {
+            setLocation(text);
+        }
     }
   };
   
@@ -147,13 +159,20 @@ export function BluetoothConnector() {
                 </p>
             </div>
             {location ? (
-                 <div className="p-4 bg-secondary rounded-lg border w-full">
-                    <h4 className="font-semibold text-foreground mb-2">Live GPS Coordinates</h4>
+                 <div className="p-4 bg-secondary rounded-lg border w-full space-y-3">
+                    <h4 className="font-semibold text-foreground mb-2">Live GPS Data</h4>
+                    {deviceId && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Tag className="h-4 w-4 text-primary"/>
+                        <span className="font-semibold">Device ID:</span>
+                        <span className="font-mono">{deviceId}</span>
+                      </div>
+                    )}
                     {typeof location === 'object' ? (
-                      <>
-                        <p className="font-mono text-sm">Lat: {location.lat.toFixed(6)}</p>
-                        <p className="font-mono text-sm">Lon: {location.lon.toFixed(6)}</p>
-                      </>
+                      <div>
+                        <p className="font-mono text-sm"><span className="font-semibold">Lat:</span> {location.lat.toFixed(6)}</p>
+                        <p className="font-mono text-sm"><span className="font-semibold">Lon:</span> {location.lon.toFixed(6)}</p>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Loader2 className="h-4 w-4 animate-spin" />
