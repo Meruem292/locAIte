@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MapMock } from "@/components/dashboard/MapMock";
 import { AiInsights } from "@/components/dashboard/AiInsights";
+import { BluetoothConnector } from "@/components/dashboard/BluetoothConnector";
 
 export default function TagDetailPage({ params }: { params: { id: string } }) {
   const tag = tags.find((t) => t.id === params.id);
@@ -78,6 +79,9 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
                     <p>{tag.battery}%</p>
                   </div>
                 </div>
+              </div>
+              <div className="mt-6">
+                <BluetoothConnector />
               </div>
             </CardContent>
           </Card>
