@@ -13,7 +13,7 @@ export function BluetoothConnector() {
   const [isLoading, setIsLoading] = useState(false);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [server, setServer] = useState<BluetoothRemoteGATTServer | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lon: number } | string | null>(null);
   const { toast } = useToast();
 
   const handleConnect = async () => {
@@ -39,6 +39,9 @@ export function BluetoothConnector() {
         description: `Connecting to: ${requestedDevice.name || `ID: ${requestedDevice.id}`}`,
       });
 
+      // Add listener for disconnection
+      requestedDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
       const gattServer = await requestedDevice.gatt?.connect();
       if (!gattServer) {
         throw new Error("Could not connect to GATT server.");
@@ -53,8 +56,7 @@ export function BluetoothConnector() {
       
       // Read initial value
       const value = await characteristic.readValue();
-      handleLocationUpdate({ target: value.buffer });
-
+      handleLocationUpdate({ target: value } as any);
 
     } catch (error: any) {
       setIsLoading(false);
@@ -73,39 +75,54 @@ export function BluetoothConnector() {
       }
     }
   };
-  
-  const handleDisconnect = () => {
-    server?.disconnect();
+
+  const onDisconnected = () => {
+    toast({
+      title: 'Device Disconnected',
+      description: `Disconnected from ${device?.name || `ID: ${device?.id}`}`,
+    });
     setDevice(null);
     setServer(null);
     setLocation(null);
-    toast({
-      title: 'Disconnected',
-      description: 'The Bluetooth device has been disconnected.',
-    });
+  };
+  
+  const handleDisconnect = () => {
+    server?.disconnect();
+    // The onDisconnected event listener will handle the state cleanup.
   }
 
   const handleLocationUpdate = (event: any) => {
-    const value = event.target.value;
+    const value = event.target.value as DataView;
     const decoder = new TextDecoder('utf-8');
     const text = decoder.decode(value);
 
-    if (text.includes(',')) {
-      const [latStr, lonStr] = text.split(',');
+    // Based on your new ESP32 code: "Lat: [latitude], Lon: [longitude]"
+    if (text.includes('Lat:') && text.includes('Lon:')) {
+      const parts = text.split(',');
+      const latStr = parts[0].split(':')[1]?.trim();
+      const lonStr = parts[1].split(':')[1]?.trim();
+      
       const lat = parseFloat(latStr);
       const lon = parseFloat(lonStr);
+      
       if (!isNaN(lat) && !isNaN(lon)) {
         setLocation({ lat, lon });
       }
+    } else {
+        // Handle other messages like "Waiting for GPS..." or "No GPS signal"
+        setLocation(text);
     }
   };
   
   useEffect(() => {
     return () => {
       // Cleanup on component unmount
-      server?.disconnect();
+      if (device) {
+          device.removeEventListener('gattserverdisconnected', onDisconnected);
+          server?.disconnect();
+      }
     }
-  }, [server]);
+  }, [device, server]);
 
   return (
     <div className="flex flex-col items-start gap-4">
@@ -119,7 +136,7 @@ export function BluetoothConnector() {
           Connect to Live Tracker
         </Button>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
             <div className="flex items-center gap-2">
                 <Button onClick={handleDisconnect} variant="destructive" size="sm">
                   <XCircle className="mr-2 h-4 w-4" />
@@ -130,10 +147,19 @@ export function BluetoothConnector() {
                 </p>
             </div>
             {location ? (
-                 <div className="p-4 bg-secondary rounded-lg border">
+                 <div className="p-4 bg-secondary rounded-lg border w-full">
                     <h4 className="font-semibold text-foreground mb-2">Live GPS Coordinates</h4>
-                    <p className="font-mono text-sm">Lat: {location.lat.toFixed(6)}</p>
-                    <p className="font-mono text-sm">Lon: {location.lon.toFixed(6)}</p>
+                    {typeof location === 'object' ? (
+                      <>
+                        <p className="font-mono text-sm">Lat: {location.lat.toFixed(6)}</p>
+                        <p className="font-mono text-sm">Lon: {location.lon.toFixed(6)}</p>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {location}
+                      </div>
+                    )}
                 </div>
             ) : (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
