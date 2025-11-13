@@ -40,14 +40,18 @@ export function DashboardHeader() {
       (!("theme" in localStorage) &&
         window.matchMedia("(prefers-color-scheme: dark)").matches);
     setIsDarkMode(isDark);
+    document.body.classList.toggle('dark', isDark);
+    document.body.classList.toggle('light', !isDark);
   }, []);
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add("dark");
+      document.body.classList.add("dark");
+      document.body.classList.remove("light");
       localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      document.body.classList.remove("dark");
+      document.body.classList.add("light");
       localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
@@ -71,7 +75,7 @@ export function DashboardHeader() {
                 href={item.href}
                 className={cn(
                   "text-muted-foreground transition-colors hover:text-foreground",
-                  pathname.startsWith(item.href) && "text-foreground font-semibold"
+                  (pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))) && "text-foreground font-semibold"
                 )}
               >
                 {item.label}
