@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import placeholderImages from '@/lib/placeholder-images.json';
 import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero');
+  const heroImage = placeholderImages.placeholderImages.find(p => p.id === 'hero');
 
   return (
     <section

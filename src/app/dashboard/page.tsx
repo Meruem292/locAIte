@@ -1,10 +1,6 @@
 'use client';
-import { TagList } from "@/components/dashboard/TagList";
-import { tags } from "@/lib/data";
-import { AiInsights } from "@/components/dashboard/AiInsights";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { HardDrive } from "lucide-react";
 
 
 export default function DashboardPage() {
@@ -48,7 +44,7 @@ export default function DashboardPage() {
                     <CardDescription>Select a device to view its details and AI insights.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p>This dashboard provides an overview of your tracked items. Navigate to the "Devices" or "Tags" section to get started.</p>
+                    <p>This dashboard provides an overview of your tracked items. Navigate to the "Devices" section to get started.</p>
                 </CardContent>
             </Card>
         </div>

@@ -18,11 +18,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Tag, HardDrive } from "lucide-react";
+import { LayoutDashboard, HardDrive } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/tags", label: "Tags", icon: Tag },
   { href: "/dashboard/devices", label: "Devices", icon: HardDrive },
 ];
 

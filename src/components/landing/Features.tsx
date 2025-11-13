@@ -1,20 +1,20 @@
 import Image from 'next/image';
 import { BrainCircuit, MapPin } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const featureList = [
   {
     icon: <MapPin className="w-8 h-8 text-primary" />,
     title: 'Real-Time GPS Tracking',
     description: 'Pinpoint the exact location of your items on a live map, anytime, anywhere. Our tags offer long battery life and durable design.',
-    image: PlaceHolderImages.find(p => p.id === 'feature-gps'),
+    image: placeholderImages.placeholderImages.find(p => p.id === 'feature-gps'),
   },
   {
     icon: <BrainCircuit className="w-8 h-8 text-primary" />,
     title: 'AI-Powered Predictions',
     description: "Our smart AI learns your habits. Misplaced your keys? LocAIte analyzes your location history to predict their most probable location, saving you time and stress.",
-    image: PlaceHolderImages.find(p => p.id === 'feature-ai'),
+    image: placeholderImages.placeholderImages.find(p => p.id === 'feature-ai'),
   },
 ];
 
