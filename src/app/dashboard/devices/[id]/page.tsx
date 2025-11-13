@@ -8,7 +8,6 @@ import type { Device } from "@/lib/devices";
 import type { Location } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Loader2, HardDrive, ArrowLeft } from "lucide-react";
-import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useMemo } from "react";
