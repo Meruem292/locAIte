@@ -10,8 +10,9 @@ import { notFound } from "next/navigation";
 import { Loader2, HardDrive, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, use } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
+import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
@@ -79,5 +80,6 @@ function DeviceDetailClient({ id }: { id: string }) {
 
 
 export default function DeviceDetailPage({ params }: { params: { id: string }}) {
-    return <DeviceDetailClient id={params.id} />;
+    const resolvedParams = use(Promise.resolve(params));
+    return <DeviceDetailClient id={resolvedParams.id} />;
 }
