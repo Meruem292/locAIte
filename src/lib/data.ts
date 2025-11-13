@@ -1,8 +1,10 @@
+import { Timestamp } from 'firebase/firestore';
+
 export type Location = {
   id: string; // Add id field
   latitude: number;
   longitude: number;
-  timestamp: string;
+  timestamp: string | Date | Timestamp;
   address?: string;
 };
 

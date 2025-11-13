@@ -1,7 +1,7 @@
 'use client';
 
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { collection, query, orderBy, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, where, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { useMemo, useState } from 'react';
 import type { Location } from '@/lib/data';
@@ -63,6 +63,25 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
         }
     };
 
+    const formatTimestamp = (timestamp: any) => {
+        if (!timestamp) return 'N/A';
+        // Firestore timestamps can be objects with seconds and nanoseconds,
+        // or they can be ISO strings if they were not created with serverTimestamp().
+        if (timestamp instanceof Timestamp) {
+            return format(timestamp.toDate(), "PPpp");
+        }
+        try {
+            // Attempt to parse it as a string or number
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) {
+                return 'Invalid Date';
+            }
+            return format(date, "PPpp");
+        } catch (e) {
+            return 'Invalid Date';
+        }
+    };
+
 
     return (
         <Card>
@@ -98,7 +117,7 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                                 {locations.map((loc) => (
                                     <TableRow key={loc.id}>
                                         <TableCell>
-                                            {loc.timestamp ? format(new Date(loc.timestamp), "PPpp") : 'N/A'}
+                                            {formatTimestamp(loc.timestamp)}
                                         </TableCell>
                                         <TableCell>{loc.latitude.toFixed(6)}</TableCell>
                                         <TableCell>{loc.longitude.toFixed(6)}</TableCell>
