@@ -60,7 +60,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4">
          <div className="flex items-center gap-6">
           <Logo />
@@ -71,7 +71,7 @@ export function DashboardHeader() {
                 href={item.href}
                 className={cn(
                   "text-muted-foreground transition-colors hover:text-foreground",
-                  pathname === item.href && "text-foreground"
+                  pathname.startsWith(item.href) && "text-foreground font-semibold"
                 )}
               >
                 {item.label}
