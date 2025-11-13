@@ -224,7 +224,14 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                                             </TableCell>
                                             <TableCell>{loc.address || 'N/A'}</TableCell>
                                             <TableCell className="text-right font-mono text-xs">
-                                                {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
+                                                <a
+                                                    href={`https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="underline hover:text-primary"
+                                                >
+                                                    {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
+                                                </a>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <DialogTrigger asChild>

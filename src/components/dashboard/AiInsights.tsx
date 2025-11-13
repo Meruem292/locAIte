@@ -10,6 +10,7 @@ import { BrainCircuit, Loader2, Sparkles, LocateFixed, History } from "lucide-re
 import { Separator } from "@/components/ui/separator";
 import { Timestamp } from "firebase/firestore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MapEmbed } from "./devices/MapEmbed";
 
 type AiInsightsProps = {
   deviceId: string;
@@ -121,8 +122,31 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
              <div className="mt-4 text-sm p-4 bg-muted/50 rounded-lg border space-y-4">
                 <div>
                     <p><span className="font-semibold text-foreground">Confidence:</span> {Math.round(prediction.predictedLocation.confidence * 100)}%</p>
-                    <p><span className="font-semibold text-foreground">Location:</span> Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}</p>
+                    <p>
+                      <span className="font-semibold text-foreground">Location:</span>{' '}
+                      <a
+                        href={`https://www.google.com/maps?q=${prediction.predictedLocation.latitude},${prediction.predictedLocation.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-primary"
+                      >
+                        Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}
+                      </a>
+                    </p>
                 </div>
+                {prediction.predictedLocation.latitude && (
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle className="text-base">Predicted Location</CardTitle>
+                    </CardHeader>
+                    <CardContent className="aspect-video w-full p-0">
+                      <MapEmbed
+                        latitude={prediction.predictedLocation.latitude}
+                        longitude={prediction.predictedLocation.longitude}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
                 <div className="space-y-2">
                     <h5 className="font-semibold text-foreground">Table of Possibilities</h5>
                      <div className="border rounded-md">
