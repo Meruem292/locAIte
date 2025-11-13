@@ -8,9 +8,19 @@ import type { Location } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, MapPin, PlusCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { MapEmbed } from './MapEmbed';
+
 
 type LocationHistoryTableProps = {
     deviceId: string;
@@ -41,6 +51,7 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
     const [isLastPage, setIsLastPage] = useState(false);
     const [isFirstPage, setIsFirstPage] = useState(true);
     const [page, setPage] = useState(1);
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
     const baseQuery = useMemo(() => {
         if (!firestore || !deviceId) return null;
@@ -51,7 +62,7 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
         );
     }, [firestore, deviceId]);
 
-    const fetchLocations = async (q: Query | null) => {
+    const fetchLocations = async (q: any) => {
         if (!q) {
             setLocations([]);
             setIsLoading(false);
@@ -174,81 +185,108 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
 
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Location History</CardTitle>
-                    <CardDescription>
-                        Recent location updates from this device.
-                    </CardDescription>
-                </div>
-                <Button onClick={handleAddDummyEntry} disabled={isAdding} size="sm" variant="outline">
-                    {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                    Add Dummy Entry
-                </Button>
-            </CardHeader>
-            <CardContent>
-                 {isLoading && (
-                    <div className="flex justify-center items-center h-48">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Dialog onOpenChange={(open) => !open && setSelectedLocation(null)}>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Location History</CardTitle>
+                        <CardDescription>
+                            Recent location updates from this device.
+                        </CardDescription>
                     </div>
-                )}
-                {!isLoading && locations && locations.length > 0 && (
-                     <div className="border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Timestamp</TableHead>
-                                    <TableHead>Address</TableHead>
-                                    <TableHead className="text-right">Coordinates</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {locations.map((loc) => (
-                                    <TableRow key={loc.id}>
-                                        <TableCell>
-                                            {formatTimestamp(loc.timestamp)}
-                                        </TableCell>
-                                        <TableCell>{loc.address || 'N/A'}</TableCell>
-                                        <TableCell className="text-right font-mono text-xs">
-                                            {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
-                                        </TableCell>
+                    <Button onClick={handleAddDummyEntry} disabled={isAdding} size="sm" variant="outline">
+                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                        Add Dummy Entry
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    {isLoading && (
+                        <div className="flex justify-center items-center h-48">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    )}
+                    {!isLoading && locations && locations.length > 0 && (
+                        <div className="border rounded-md">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Timestamp</TableHead>
+                                        <TableHead>Address</TableHead>
+                                        <TableHead className="text-right">Coordinates</TableHead>
+                                        <TableHead className="text-center">Map</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                     </div>
-                )}
-                 {!isLoading && (!locations || locations.length === 0) && (
-                    <div className="flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-lg p-12 h-48">
-                        <MapPin className="w-12 h-12 text-muted-foreground" />
-                        <h3 className="mt-4 text-lg font-semibold">No Location History Found</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">This device has not reported any locations yet.</p>
-                    </div>
-                )}
-                {locations.length > 0 && (
-                    <div className="flex items-center justify-end space-x-2 pt-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={fetchPrevPage}
-                            disabled={isFirstPage || isLoading}
-                        >
-                            <ChevronLeft className="h-4 w-4 mr-1" />
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={fetchNextPage}
-                            disabled={isLastPage || isLoading || locations.length < PAGE_SIZE}
-                        >
-                            Next
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {locations.map((loc) => (
+                                        <TableRow key={loc.id}>
+                                            <TableCell>
+                                                {formatTimestamp(loc.timestamp)}
+                                            </TableCell>
+                                            <TableCell>{loc.address || 'N/A'}</TableCell>
+                                            <TableCell className="text-right font-mono text-xs">
+                                                {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <DialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => setSelectedLocation(loc)}>
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                </DialogTrigger>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )}
+                    {!isLoading && (!locations || locations.length === 0) && (
+                        <div className="flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-lg p-12 h-48">
+                            <MapPin className="w-12 h-12 text-muted-foreground" />
+                            <h3 className="mt-4 text-lg font-semibold">No Location History Found</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">This device has not reported any locations yet.</p>
+                        </div>
+                    )}
+                    {locations.length > 0 && (
+                        <div className="flex items-center justify-end space-x-2 pt-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={fetchPrevPage}
+                                disabled={isFirstPage || isLoading}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Previous
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={fetchNextPage}
+                                disabled={isLastPage || isLoading || locations.length < PAGE_SIZE}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Location on Map</DialogTitle>
+                    <DialogDescription>
+                        {selectedLocation?.address || `Coordinates: ${selectedLocation?.latitude}, ${selectedLocation?.longitude}`}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="aspect-video w-full">
+                    {selectedLocation && (
+                        <MapEmbed
+                            latitude={selectedLocation.latitude}
+                            longitude={selectedLocation.longitude}
+                        />
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }
