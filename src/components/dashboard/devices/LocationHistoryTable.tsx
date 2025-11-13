@@ -16,6 +16,18 @@ type LocationHistoryTableProps = {
     deviceId: string;
 };
 
+async function getAddressFromCoordinates(lat: number, lon: number): Promise<string> {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        const data = await response.json();
+        return data.display_name || 'Address not found';
+    } catch (error) {
+        console.error("Error fetching address:", error);
+        return 'Could not fetch address';
+    }
+}
+
+
 export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -39,13 +51,16 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
 
         setIsAdding(true);
         try {
-            const lat = 34.0522 + (Math.random() - 0.5) * 0.1; // Randomize around LA
-            const lon = -118.2437 + (Math.random() - 0.5) * 0.1;
+            const lat = 14.3107 + (Math.random() - 0.5) * 0.01;
+            const lon = 120.9630 + (Math.random() - 0.5) * 0.01;
+            
+            const address = await getAddressFromCoordinates(lat, lon);
 
             await addDoc(collection(firestore, 'locations'), {
                 deviceId: deviceId,
                 latitude: lat,
                 longitude: lon,
+                address: address,
                 timestamp: serverTimestamp(),
             });
             toast({
@@ -65,13 +80,10 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
 
     const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'N/A';
-        // Firestore timestamps can be objects with seconds and nanoseconds,
-        // or they can be ISO strings if they were not created with serverTimestamp().
         if (timestamp instanceof Timestamp) {
             return format(timestamp.toDate(), "PPpp");
         }
         try {
-            // Attempt to parse it as a string or number
             const date = new Date(timestamp);
             if (isNaN(date.getTime())) {
                 return 'Invalid Date';
@@ -109,8 +121,8 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Timestamp</TableHead>
-                                    <TableHead>Latitude</TableHead>
-                                    <TableHead>Longitude</TableHead>
+                                    <TableHead>Address</TableHead>
+                                    <TableHead className="text-right">Coordinates</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -119,8 +131,10 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                                         <TableCell>
                                             {formatTimestamp(loc.timestamp)}
                                         </TableCell>
-                                        <TableCell>{loc.latitude.toFixed(6)}</TableCell>
-                                        <TableCell>{loc.longitude.toFixed(6)}</TableCell>
+                                        <TableCell>{loc.address || 'N/A'}</TableCell>
+                                        <TableCell className="text-right font-mono text-xs">
+                                            {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

@@ -11,11 +11,22 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
 const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
+async function getAddressFromCoordinates(lat: number, lon: number): Promise<string> {
+  try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+      const data = await response.json();
+      return data.display_name || 'Address not found';
+  } catch (error) {
+      console.error("Error fetching address:", error);
+      return 'Could not fetch address';
+  }
+}
+
 export function BluetoothConnector() {
   const [isLoading, setIsLoading] = useState(false);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [server, setServer] = useState<BluetoothRemoteGATTServer | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lon: number } | string | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lon: number; address?: string } | string | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -40,7 +51,8 @@ export function BluetoothConnector() {
       const lon = lonMatch ? parseFloat(lonMatch[1]) : NaN;
       
       if (!isNaN(lat) && !isNaN(lon)) {
-        const newLocation = { lat, lon };
+        const address = await getAddressFromCoordinates(lat, lon);
+        const newLocation = { lat, lon, address };
         setLocation(newLocation);
 
         if (currentDeviceId && firestore) {
@@ -49,6 +61,7 @@ export function BluetoothConnector() {
               deviceId: currentDeviceId,
               latitude: newLocation.lat,
               longitude: newLocation.lon,
+              address: newLocation.address,
               timestamp: serverTimestamp(),
             });
           } catch (error) {
@@ -193,6 +206,7 @@ export function BluetoothConnector() {
                       <div>
                         <p className="font-mono text-sm"><span className="font-semibold">Lat:</span> {location.lat.toFixed(6)}</p>
                         <p className="font-mono text-sm"><span className="font-semibold">Lon:</span> {location.lon.toFixed(6)}</p>
+                        {location.address && <p className="text-sm mt-2"><span className="font-semibold">Address:</span> {location.address}</p>}
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
