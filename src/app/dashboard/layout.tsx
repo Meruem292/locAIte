@@ -1,5 +1,5 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardSidebar, SidebarInset } from "@/components/dashboard/DashboardSidebar";
 
 export default function DashboardLayout({
   children,
@@ -11,9 +11,11 @@ export default function DashboardLayout({
       <DashboardHeader />
       <div className="flex flex-1">
         <DashboardSidebar />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <SidebarInset>
+          <main className="flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </SidebarInset>
       </div>
     </div>
   );

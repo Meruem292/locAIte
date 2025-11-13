@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
+  SidebarInset
 } from "@/components/ui/sidebar";
 import { Tag, HardDrive } from "lucide-react";
 
@@ -54,3 +55,5 @@ export function DashboardSidebar() {
     </Sidebar>
   );
 }
+
+export { SidebarInset };
