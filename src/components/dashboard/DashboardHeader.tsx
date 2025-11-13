@@ -51,8 +51,8 @@ export function DashboardHeader() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user?.photoURL ?? "https://i.pravatar.cc/150"} alt="User Avatar" />
-                    <AvatarFallback>{user?.displayName?.[0] ?? 'U'}</AvatarFallback>
+                    <AvatarImage src={user?.photoURL ?? undefined} alt="User Avatar" />
+                    <AvatarFallback>{user?.displayName?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
