@@ -11,7 +11,7 @@ import { Loader2, HardDrive, ArrowLeft } from "lucide-react";
 import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useMemo, use } from "react";
+import { useMemo } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 
 function DeviceDetailClient({ id }: { id: string }) {
@@ -79,11 +79,6 @@ function DeviceDetailClient({ id }: { id: string }) {
 }
 
 
-export default function DeviceDetailPage({ params, searchParams }: { params: { id: string }, searchParams: {[key: string]: string | string[] | undefined} }) {
-    // The `use` hook is still recommended for Suspense compatibility,
-    // but in this structure, we pass the resolved value to the client component.
-    const resolvedParams = use(Promise.resolve(params));
-    use(Promise.resolve(searchParams));
-
-    return <DeviceDetailClient id={resolvedParams.id} />;
+export default function DeviceDetailPage({ params }: { params: { id: string }}) {
+    return <DeviceDetailClient id={params.id} />;
 }
