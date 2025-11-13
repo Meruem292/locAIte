@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarProvider,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Tag, HardDrive } from "lucide-react";
@@ -38,16 +37,16 @@ export function DashboardSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref legacyBehavior>
-                <SidebarMenuButton
-                  as="a"
-                  isActive={pathname === item.href}
-                  onClick={() => setOpenMobile(false)}
-                >
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.href}
+                onClick={() => setOpenMobile(false)}
+              >
+                <Link href={item.href}>
                   <item.icon className="h-5 w-5 mr-3" />
                   {item.label}
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
