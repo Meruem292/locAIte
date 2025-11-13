@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BrainCircuit, Loader2, Sparkles, LocateFixed, History } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Timestamp } from "firebase/firestore";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type AiInsightsProps = {
   deviceId: string;
@@ -70,6 +71,10 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
   };
   
   const hasHistory = locationHistory && locationHistory.length > 0;
+  
+  const predictionSteps = prediction?.predictedLocation.reason
+    .split(/\d+\.\s/)
+    .filter(step => step.trim() !== '');
 
   return (
     <Card className="sticky top-24 shadow-sm border">
@@ -113,10 +118,32 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
             Predict Likely Location
           </Button>
           {prediction && !isPredictionLoading && (
-            <div className="mt-4 text-sm p-4 bg-muted/50 rounded-lg border space-y-2">
-              <p><span className="font-semibold text-foreground">Plan:</span> {prediction.predictedLocation.reason}</p>
-              <p><span className="font-semibold text-foreground">Confidence:</span> {Math.round(prediction.predictedLocation.confidence * 100)}%</p>
-              <p><span className="font-semibold text-foreground">Location:</span> Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}</p>
+             <div className="mt-4 text-sm p-4 bg-muted/50 rounded-lg border space-y-4">
+                <div>
+                    <p><span className="font-semibold text-foreground">Confidence:</span> {Math.round(prediction.predictedLocation.confidence * 100)}%</p>
+                    <p><span className="font-semibold text-foreground">Location:</span> Lat: {prediction.predictedLocation.latitude.toFixed(4)}, Lon: {prediction.predictedLocation.longitude.toFixed(4)}</p>
+                </div>
+                <div className="space-y-2">
+                    <h5 className="font-semibold text-foreground">Table of Possibilities</h5>
+                     <div className="border rounded-md">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                <TableHead className="w-[50px]">Step</TableHead>
+                                <TableHead>Suggested Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {predictionSteps?.map((step, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">{index + 1}</TableCell>
+                                    <TableCell>{step.trim()}</TableCell>
+                                </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
             </div>
           )}
         </div>
