@@ -15,10 +15,13 @@ import {
 import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Menu } from "lucide-react";
 
 export function DashboardHeader() {
   const { auth, user } = useAuth();
   const router = useRouter();
+  const { toggleSidebar } = useSidebar();
 
   const handleLogout = async () => {
     if (auth) {
@@ -30,7 +33,18 @@ export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
-        <Logo />
+         <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={toggleSidebar}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+          <Logo />
+        </div>
         <div className="flex items-center gap-4">
           {user && (
             <DropdownMenu>

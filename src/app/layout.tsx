@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: "LocAIte",
@@ -24,7 +25,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background">
-        <FirebaseClientProvider>{children}</FirebaseClientProvider>
+        <SidebarProvider>
+          <FirebaseClientProvider>{children}</FirebaseClientProvider>
+        </SidebarProvider>
         <Toaster />
       </body>
     </html>
