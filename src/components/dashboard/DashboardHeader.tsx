@@ -3,7 +3,7 @@
 import { Logo } from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, Sun, Moon, Menu } from "lucide-react";
+import { LogOut, Settings, Sun, Moon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +16,6 @@ import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Tag, HardDrive } from "lucide-react";
@@ -37,11 +32,9 @@ export function DashboardHeader() {
   const router = useRouter();
   const pathname = usePathname();
   
-  // A simple theme toggle state. In a real app, you'd use a theme provider.
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or system preference
     const isDark =
       localStorage.getItem("theme") === "dark" ||
       (!("theme" in localStorage) &&
@@ -70,39 +63,21 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4">
          <div className="flex items-center gap-6">
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle navigation menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <div className="flex flex-col gap-4 p-4">
-                  <Logo />
-                  <nav className="grid gap-2 text-lg font-medium">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                          pathname === item.href && "text-primary bg-muted"
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-          <div className="hidden md:block">
-            <Logo />
-          </div>
+          <Logo />
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "text-muted-foreground transition-colors hover:text-foreground",
+                  pathname === item.href && "text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)}>

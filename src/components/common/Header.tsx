@@ -27,11 +27,11 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         <Logo />
         
-        <div className="hidden md:flex items-center gap-4">
-          <Button variant="ghost" asChild className={cn("hover:bg-primary-foreground/10", scrolled ? "text-foreground hover:bg-accent hover:text-accent-foreground" : "text-primary-foreground hover:bg-primary-foreground/10")}>
+        <div className="hidden md:flex items-center gap-2">
+          <Button variant="ghost" asChild className={cn("hover:bg-accent hover:text-accent-foreground", scrolled ? "text-foreground" : "text-primary-foreground")}>
             <Link href="/login">Login</Link>
           </Button>
-          <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Link href="/signup">Sign Up</Link>
           </Button>
         </div>

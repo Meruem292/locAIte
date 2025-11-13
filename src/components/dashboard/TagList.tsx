@@ -32,7 +32,7 @@ export function TagList({ tags }: TagListProps) {
         const tagImage = getImage(tag.image);
         return (
           <Link href={`/dashboard/tags/${tag.id}`} key={tag.id} className="group">
-            <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 bg-card">
+            <Card className="h-full flex flex-col transition-shadow duration-300 hover:shadow-lg border-transparent hover:border-border bg-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-lg font-medium">{tag.name}</CardTitle>
                 {tagImage && (
@@ -59,7 +59,7 @@ export function TagList({ tags }: TagListProps) {
                   <div className="flex items-center gap-1.5">
                     <Battery className="h-4 w-4"/> {tag.battery}%
                   </div>
-                  <ChevronRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ChevronRight className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </CardContent>
             </Card>
