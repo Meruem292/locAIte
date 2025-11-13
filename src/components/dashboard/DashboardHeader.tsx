@@ -3,7 +3,7 @@
 import { Logo } from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, Sun, Moon } from "lucide-react";
+import { LogOut, Settings, Sun, Moon, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,18 +14,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { useRouter, usePathname } from "next/navigation";
-import Link from 'next/link';
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { LayoutDashboard, Tag, HardDrive } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/tags", label: "Tags" },
-  { href: "/dashboard/devices", label: "Devices" },
-  { href: "/dashboard/location", label: "Location" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/tags", label: "Tags", icon: Tag },
+  { href: "/dashboard/devices", label: "Devices", icon: HardDrive },
 ];
+
 
 export function DashboardHeader() {
   const { auth, user } = useAuth();
@@ -36,7 +41,22 @@ export function DashboardHeader() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    document.body.classList.toggle('dark', isDarkMode);
+    // Check for saved theme preference or system preference
+    const isDark =
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setIsDarkMode(isDark);
+  }, []);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   }, [isDarkMode]);
 
   const handleLogout = async () => {
@@ -50,19 +70,39 @@ export function DashboardHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4">
          <div className="flex items-center gap-6">
-          <Logo />
-          <nav className="hidden md:flex items-center gap-4">
-            {navItems.map((item) => (
-                <Link key={item.href} href={item.href} legacyBehavior>
-                    <a className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground"
-                    )}>
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <div className="flex flex-col gap-4 p-4">
+                  <Logo />
+                  <nav className="grid gap-2 text-lg font-medium">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                          pathname === item.href && "text-primary bg-muted"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
                         {item.label}
-                    </a>
-                </Link>
-            ))}
-          </nav>
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          <div className="hidden md:block">
+            <Logo />
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => setIsDarkMode(!isDarkMode)}>
@@ -89,7 +129,7 @@ export function DashboardHeader() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
