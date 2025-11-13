@@ -9,15 +9,16 @@ import { Loader2, HardDrive, ArrowLeft } from "lucide-react";
 import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, use } from "react";
 
-export default function DeviceDetailPage({ params }: { params: { id: string } }) {
+export default function DeviceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const firestore = useFirestore();
     
     const deviceRef = useMemo(() => {
         if (!firestore) return null;
-        return doc(firestore, 'devices', params.id);
-    }, [firestore, params.id]);
+        return doc(firestore, 'devices', id);
+    }, [firestore, id]);
 
     const { data: device, loading } = useDoc<Device>(deviceRef, { idField: 'id' });
 
@@ -51,7 +52,7 @@ export default function DeviceDetailPage({ params }: { params: { id: string } })
                 </div>
             </div>
 
-            <LocationHistoryTable deviceId={params.id} />
+            <LocationHistoryTable deviceId={id} />
         </div>
     );
 }
