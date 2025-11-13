@@ -16,6 +16,7 @@ const SummarizeLocationHistoryInputSchema = z.object({
     latitude: z.number().describe('The latitude of the location.'),
     longitude: z.number().describe('The longitude of the location.'),
     timestamp: z.string().describe('The timestamp of the location (ISO format).'),
+    address: z.string().optional().describe('The human-readable address of the location.'),
   })).describe('The location history data to summarize.'),
   timePeriod: z.string().describe('The time period for which to summarize the location history (e.g., last week, last month).'),
 });
@@ -36,16 +37,15 @@ const prompt = ai.definePrompt({
   output: {schema: SummarizeLocationHistoryOutputSchema},
   prompt: `You are an AI assistant that summarizes location history data for a user.
 
-  The location history data is provided as an array of latitude, longitude, and timestamp values.
-  The user wants a summary of the location history over the specified time period.
+  The user wants a summary of the location history over the specified time period. Use the human-readable address when available.
 
   Time Period: {{{timePeriod}}}
   Location History:
   {{#each locationHistory}}
-  - Latitude: {{{latitude}}}, Longitude: {{{longitude}}}, Timestamp: {{{timestamp}}}
+  - Location: {{#if address}}{{{address}}}{{else}}Lat: {{{latitude}}}, Lon: {{{longitude}}}{{/if}}, Timestamp: {{{timestamp}}}
   {{/each}}
 
-  Please provide a concise summary of the location history, highlighting the most frequent locations and the overall movement patterns.
+  Please provide a concise summary of the location history, highlighting the most frequent locations and the overall movement patterns based on the addresses.
   `,
 });
 
