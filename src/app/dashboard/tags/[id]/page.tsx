@@ -1,4 +1,5 @@
 
+'use client';
 import { tags } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -11,9 +12,21 @@ import { Button } from "@/components/ui/button";
 import { MapMock } from "@/components/dashboard/MapMock";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 import { BluetoothConnector } from "@/components/dashboard/BluetoothConnector";
+import type { Location } from "@/lib/data";
+import { useMemo } from "react";
+import { useCollection } from "@/firebase/firestore/use-collection";
+import { useFirestore } from "@/firebase";
+import { collection, query, where, orderBy, limit } from "firebase/firestore";
 
 export default function TagDetailPage({ params }: { params: { id: string } }) {
   const tag = tags.find((t) => t.id === params.id);
+  const firestore = useFirestore();
+
+  // This is a static page for now, but we can wire it up to real data.
+  // For AI insights, we'll use the static location history.
+  // In a real app, this `locationHistory` would come from a Firestore query.
+  const locationHistory: Location[] = tag ? tag.locationHistory.map(l => ({...l, timestamp: new Date(l.timestamp)})) : [];
+
 
   if (!tag) {
     notFound();
@@ -38,7 +51,7 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
   return (
     <div className="p-4 md:p-8">
       <Button variant="outline" asChild className="mb-6">
-        <Link href="/dashboard">
+        <Link href="/dashboard/tags">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to all tags
         </Link>
@@ -100,7 +113,7 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="lg:col-span-1">
-          <AiInsights tag={tag} />
+          <AiInsights deviceId={tag.id} locationHistory={locationHistory} />
         </div>
       </div>
     </div>

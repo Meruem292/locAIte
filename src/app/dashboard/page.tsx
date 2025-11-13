@@ -1,3 +1,4 @@
+'use client';
 import { TagList } from "@/components/dashboard/TagList";
 import { tags } from "@/lib/data";
 import { AiInsights } from "@/components/dashboard/AiInsights";
@@ -7,8 +8,8 @@ import { HardDrive } from "lucide-react";
 
 
 export default function DashboardPage() {
-  // Assuming we only need AI insights for the first tag for this layout example
-  const firstTag = tags[0];
+  // This page is becoming more of a placeholder as we focus on device/tag specifics.
+  // We will leave the emergency contacts here for now.
 
   return (
     <div className="grid gap-8 md:grid-cols-3">
@@ -41,7 +42,15 @@ export default function DashboardPage() {
             </Card>
         </div>
         <div className="md:col-span-2">
-            {firstTag && <AiInsights tag={firstTag} />}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Welcome to LocAIte</CardTitle>
+                    <CardDescription>Select a device to view its details and AI insights.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p>This dashboard provides an overview of your tracked items. Navigate to the "Devices" or "Tags" section to get started.</p>
+                </CardContent>
+            </Card>
         </div>
     </div>
   );

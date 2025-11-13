@@ -9,16 +9,19 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
+import type { Location } from '@/lib/data';
 
 const PredictTagLocationInputSchema = z.object({
   tagId: z.string().describe('The ID of the tag to predict the location for.'),
   historicalLocations: z
     .array(
       z.object({
+        id: z.string(),
         latitude: z.number().describe('The latitude of the location.'),
         longitude: z.number().describe('The longitude of the location.'),
-        timestamp: z.string().describe('The timestamp of the location (ISO format).'),
+        timestamp: z.any().describe('The timestamp of the location (ISO format).'),
+        address: z.string().optional().describe('The human-readable address of the location.'),
       })
     )
     .describe('The historical locations of the tag.'),
@@ -30,13 +33,22 @@ const PredictTagLocationOutputSchema = z.object({
     latitude: z.number().describe('The predicted latitude of the tag.'),
     longitude: z.number().describe('The predicted longitude of the tag.'),
     confidence: z.number().describe('The confidence level of the prediction (0-1).'),
-    reason: z.string().describe('The reason for predicting this location.'),
+    reason: z.string().describe('The reason for predicting this location, including a backtracking plan.'),
   }).describe('The predicted location of the tag based on historical data.'),
 });
 export type PredictTagLocationOutput = z.infer<typeof PredictTagLocationOutputSchema>;
 
-export async function predictTagLocation(input: PredictTagLocationInput): Promise<PredictTagLocationOutput> {
-  return predictTagLocationFlow(input);
+export async function predictTagLocation(input: {tagId: string, historicalLocations: Location[]}): Promise<PredictTagLocationOutput> {
+  // Zod schema doesn't handle Date/Timestamp objects well when passing from client to server action
+  // So we manually construct the input for the flow.
+  const flowInput = {
+    ...input,
+    historicalLocations: input.historicalLocations.map(l => ({
+      ...l,
+      timestamp: l.timestamp instanceof Date ? l.timestamp.toISOString() : l.timestamp,
+    }))
+  }
+  return predictTagLocationFlow(flowInput);
 }
 
 const prompt = ai.definePrompt({
@@ -47,15 +59,13 @@ const prompt = ai.definePrompt({
 
   Analyze the following historical location data for tag ID {{{tagId}}}:
   {{#each historicalLocations}}
-  - Latitude: {{{latitude}}}, Longitude: {{{longitude}}}, Timestamp: {{{timestamp}}}
+  - Address: {{{address}}}, Latitude: {{{latitude}}}, Longitude: {{{longitude}}}, Timestamp: {{{timestamp}}}
   {{/each}}
 
   Based on these patterns, predict the most likely current location of the tag.
-  Consider factors such as frequently visited locations, time of day, and recent movements.
-  Provide a confidence level (0-1) for your prediction and a brief explanation of your reasoning.
-
-  Format your response as a JSON object matching the following schema:
-  ${JSON.stringify(PredictTagLocationOutputSchema.describe('The predicted location of the tag'))}
+  Consider factors such as the most recent location, frequently visited locations, and time of day patterns.
+  Provide a confidence level (0-1) for your prediction.
+  Also, provide a brief explanation of your reasoning that can be used as a backtracking plan to find the device.
   `,
 });
 
