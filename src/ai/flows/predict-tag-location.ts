@@ -38,17 +38,15 @@ const PredictTagLocationOutputSchema = z.object({
 });
 export type PredictTagLocationOutput = z.infer<typeof PredictTagLocationOutputSchema>;
 
-export async function predictTagLocation(input: {tagId: string, historicalLocations: Location[]}): Promise<PredictTagLocationOutput> {
-  // Zod schema doesn't handle Date/Timestamp objects well when passing from client to server action
-  // So we manually construct the input for the flow.
-  const flowInput = {
-    ...input,
-    historicalLocations: input.historicalLocations.map(l => ({
-      ...l,
-      timestamp: l.timestamp instanceof Date ? l.timestamp.toISOString() : l.timestamp,
-    }))
-  }
-  return predictTagLocationFlow(flowInput);
+type ServerActionInput = {
+  tagId: string;
+  historicalLocations: (Omit<Location, 'timestamp'> & { timestamp: string })[];
+}
+
+export async function predictTagLocation(input: ServerActionInput): Promise<PredictTagLocationOutput> {
+  // The input from the client should now have string timestamps.
+  // The zod schema for the flow input expects `any` so no further conversion is needed here.
+  return predictTagLocationFlow(input);
 }
 
 const prompt = ai.definePrompt({

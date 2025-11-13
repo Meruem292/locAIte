@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BrainCircuit, Loader2, Sparkles, LocateFixed, History } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Timestamp } from "firebase/firestore";
 
 type AiInsightsProps = {
   deviceId: string;
@@ -20,13 +21,26 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isPredictionLoading, setIsPredictionLoading] = useState(false);
 
+  const toSerializableLocation = (loc: Location) => {
+    let timestampStr: string;
+    if (loc.timestamp instanceof Timestamp) {
+      timestampStr = loc.timestamp.toDate().toISOString();
+    } else if (loc.timestamp instanceof Date) {
+      timestampStr = loc.timestamp.toISOString();
+    } else {
+      timestampStr = loc.timestamp as string;
+    }
+    return { ...loc, timestamp: timestampStr };
+  };
+
   const handleSummarize = async () => {
     if (!locationHistory || locationHistory.length === 0) return;
     setIsSummaryLoading(true);
     setSummary(null);
     try {
+      const serializableHistory = locationHistory.map(toSerializableLocation);
       const result = await summarizeLocationHistory({
-        locationHistory: locationHistory.map(l => ({...l, timestamp: l.timestamp.toString()})),
+        locationHistory: serializableHistory,
         timePeriod: "last 50 locations",
       });
       setSummary(result);
@@ -42,9 +56,10 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
     setIsPredictionLoading(true);
     setPrediction(null);
     try {
+      const serializableHistory = locationHistory.map(toSerializableLocation);
       const result = await predictTagLocation({
         tagId: deviceId,
-        historicalLocations: locationHistory,
+        historicalLocations: serializableHistory,
       });
       setPrediction(result);
     } catch (error) {
