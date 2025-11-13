@@ -28,7 +28,7 @@ export default function DevicesPage() {
   const { data: devices, loading } = useCollection<Device>(devicesQuery, { idField: 'id' });
 
   return (
-    <div>
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold font-headline text-primary">Device Management</h1>
         <Button

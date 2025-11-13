@@ -5,7 +5,7 @@ import { tags } from "@/lib/data";
 
 export default function DashboardPage() {
   return (
-    <div>
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold font-headline text-primary">Your Tags</h1>
         <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">

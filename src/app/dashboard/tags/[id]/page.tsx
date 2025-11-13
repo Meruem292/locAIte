@@ -36,7 +36,7 @@ export default function TagDetailPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div>
+    <div className="p-4 md:p-8">
       <Button variant="outline" asChild className="mb-6">
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
