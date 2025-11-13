@@ -14,8 +14,9 @@ import Link from "next/link";
 import { useMemo, use } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 
-export default function DeviceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function DeviceDetailPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{[key: string]: string | string[] | undefined}> }) {
     const { id } = use(params);
+    use(searchParams);
     const firestore = useFirestore();
     
     const deviceRef = useMemo(() => {
