@@ -22,15 +22,15 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useAuth, useFirestore } from '@/firebase';
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Device } from '@/lib/devices';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Device name must be at least 2 characters.' }),
-  id: z.string().optional(),
+  id: z.string().min(1, { message: 'Device ID cannot be empty.' }),
 });
 
 type AddEditDeviceDialogProps = {
@@ -54,6 +54,12 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
     },
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      form.reset(device ? { name: device.name, id: device.id } : { name: '', id: '' });
+    }
+  }, [isOpen, device, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
       toast({
@@ -74,7 +80,8 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
           description: `Device "${values.name}" has been updated.`,
         });
       } else {
-        await addDoc(collection(firestore, 'devices'), {
+        const deviceRef = doc(firestore, 'devices', values.id);
+        await setDoc(deviceRef, {
           name: values.name,
           userId: user.uid,
           createdAt: serverTimestamp(),
@@ -85,7 +92,6 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
         });
       }
       onOpenChange(false);
-      form.reset();
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -96,11 +102,6 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
       setIsLoading(false);
     }
   }
-  
-  // Reset form when dialog opens for a new device
-  if (isOpen && !isEditing && form.formState.isSubmitSuccessful) {
-    form.reset({ name: '', id: '' });
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -108,11 +109,11 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Device' : 'Add New Device'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update the name of your device.' : 'Enter a name for your new device. The ID will be generated automatically.'}
+            {isEditing ? 'Update the details of your device.' : 'Enter a name and a unique ID for your new device.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-4">
             <FormField
               control={form.control}
               name="name"
@@ -120,27 +121,25 @@ export function AddEditDeviceDialog({ isOpen, onOpenChange, device }: AddEditDev
                 <FormItem>
                   <FormLabel>Device Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Car Keys" {...field} disabled={isLoading} />
+                    <Input placeholder="e.g., Car Keys Tracker" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {isEditing && (
-                 <FormField
-                    control={form.control}
-                    name="id"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Device ID</FormLabel>
-                        <FormControl>
-                            <Input {...field} disabled />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-            )}
+            <FormField
+              control={form.control}
+              name="id"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Device ID</FormLabel>
+                  <FormControl>
+                      <Input placeholder="e.g., L-001" {...field} disabled={isLoading || isEditing} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
                 Cancel
