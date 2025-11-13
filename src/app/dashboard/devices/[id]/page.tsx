@@ -14,9 +14,7 @@ import Link from "next/link";
 import { useMemo, use } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 
-export default function DeviceDetailPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{[key: string]: string | string[] | undefined}> }) {
-    const { id } = use(params);
-    use(searchParams);
+function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
     
     const deviceRef = useMemo(() => {
@@ -78,4 +76,14 @@ export default function DeviceDetailPage({ params, searchParams }: { params: Pro
             </div>
         </div>
     );
+}
+
+
+export default function DeviceDetailPage({ params, searchParams }: { params: { id: string }, searchParams: {[key: string]: string | string[] | undefined} }) {
+    // The `use` hook is still recommended for Suspense compatibility,
+    // but in this structure, we pass the resolved value to the client component.
+    const resolvedParams = use(Promise.resolve(params));
+    use(Promise.resolve(searchParams));
+
+    return <DeviceDetailClient id={resolvedParams.id} />;
 }
