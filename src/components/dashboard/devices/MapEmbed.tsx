@@ -6,19 +6,9 @@ type MapEmbedProps = {
 };
 
 export function MapEmbed({ latitude, longitude }: MapEmbedProps) {
-    const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!googleMapsApiKey) {
-        return (
-            <div className="flex items-center justify-center h-full bg-muted rounded-lg">
-                <p className="text-muted-foreground text-center p-4">
-                    Google Maps API key is not configured. Please add it to your .env file.
-                </p>
-            </div>
-        );
-    }
-
-    const mapSrc = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${latitude},${longitude}&zoom=15`;
+    // This uses a query parameter 'q' to center the map, which works without an API key for basic embeds.
+    // The 'pb' parameter is complex and not necessary for just showing a location.
+    const mapSrc = `https://maps.google.com/maps?q=${latitude},${longitude}&hl=en&z=14&output=embed`;
 
     return (
         <iframe
@@ -27,6 +17,7 @@ export function MapEmbed({ latitude, longitude }: MapEmbedProps) {
             style={{ border: 0 }}
             loading="lazy"
             allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
             src={mapSrc}
             className="rounded-lg"
         ></iframe>
