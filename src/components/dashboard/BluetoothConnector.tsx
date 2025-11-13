@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Bluetooth, Loader2, XCircle, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // From your ESP32 code
 const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
@@ -16,16 +18,18 @@ export function BluetoothConnector() {
   const [location, setLocation] = useState<{ lat: number; lon: number } | string | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
-  const handleLocationUpdate = (event: any) => {
+  const handleLocationUpdate = useCallback(async (event: any) => {
     const value = event.target.value as DataView;
     const decoder = new TextDecoder('utf-8');
     const text = decoder.decode(value);
 
     // Format: "Device: L-001, Lat: x.xxxxxx, Lon: y.yyyyyy"
     const deviceIdMatch = text.match(/Device: ([\w-]+)/);
-    if (deviceIdMatch && deviceIdMatch[1]) {
-      setDeviceId(deviceIdMatch[1]);
+    const currentDeviceId = deviceIdMatch?.[1] ?? null;
+    if (currentDeviceId) {
+      setDeviceId(currentDeviceId);
     }
 
     if (text.includes('Lat:') && text.includes('Lon:')) {
@@ -36,10 +40,23 @@ export function BluetoothConnector() {
       const lon = lonMatch ? parseFloat(lonMatch[1]) : NaN;
       
       if (!isNaN(lat) && !isNaN(lon)) {
-        setLocation({ lat, lon });
+        const newLocation = { lat, lon };
+        setLocation(newLocation);
+
+        if (currentDeviceId && firestore) {
+          try {
+            await addDoc(collection(firestore, 'locations'), {
+              deviceId: currentDeviceId,
+              latitude: newLocation.lat,
+              longitude: newLocation.lon,
+              timestamp: serverTimestamp(),
+            });
+          } catch (error) {
+            console.error("Error saving location to Firestore:", error);
+          }
+        }
       }
     } else {
-        // Handle other messages like "Waiting for GPS..." or "No GPS signal"
         const messageMatch = text.match(/, (.*)$/);
         if (messageMatch && messageMatch[1]) {
             setLocation(messageMatch[1]);
@@ -47,7 +64,7 @@ export function BluetoothConnector() {
             setLocation(text);
         }
     }
-  };
+  }, [firestore]);
 
   const connectToDevice = useCallback(async (deviceToConnect: BluetoothDevice) => {
     setIsLoading(true);
@@ -73,8 +90,9 @@ export function BluetoothConnector() {
       characteristic.addEventListener('characteristicvaluechanged', handleLocationUpdate);
       
       // Read initial value
-      const value = await characteristic.readValue();
-      handleLocationUpdate({ target: value } as any);
+      const initialValue = await characteristic.readValue();
+      handleLocationUpdate({ target: { value: initialValue } });
+
       setIsLoading(false);
       return true;
     } catch (error: any) {
@@ -87,7 +105,7 @@ export function BluetoothConnector() {
         });
         return false;
     }
-  }, [toast]);
+  }, [toast, handleLocationUpdate]);
 
   const onDisconnected = useCallback(() => {
     toast({
@@ -130,24 +148,6 @@ export function BluetoothConnector() {
     server?.disconnect();
   }
   
-  useEffect(() => {
-    const autoConnect = async () => {
-        if (navigator.bluetooth && typeof navigator.bluetooth.getDevices === 'function') {
-            try {
-                const permittedDevices = await navigator.bluetooth.getDevices();
-                const knownDevice = permittedDevices.find(d => d.name?.includes('ESP32')); // Or a more specific check
-                
-                if (knownDevice) {
-                    await connectToDevice(knownDevice);
-                }
-            } catch (error) {
-                console.error("Error during auto-connect:", error);
-            }
-        }
-    };
-    autoConnect();
-  }, [connectToDevice]);
-
   useEffect(() => {
     return () => {
       if (device) {
