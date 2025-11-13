@@ -8,19 +8,19 @@ export function Hero() {
 
   return (
     <section
-      className="relative w-full h-[calc(100vh-4rem)] bg-cover bg-fixed bg-center"
+      className="relative w-full h-screen bg-cover bg-fixed bg-center"
       style={{ backgroundImage: `url(${heroImage?.imageUrl})` }}
     >
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center justify-center text-center">
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+      <div className="relative z-10 px-4 h-full flex flex-col items-center justify-center text-center">
         <div className="flex flex-col items-center space-y-6">
-          <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl font-headline">
+          <h1 className="text-5xl font-bold tracking-tighter text-foreground sm:text-6xl md:text-7xl lg:text-8xl font-headline animate-fade-in-down">
             Never Lose Anything Again.
           </h1>
-          <p className="max-w-3xl text-lg text-white/90 md:text-xl">
+          <p className="max-w-3xl text-lg text-foreground/90 md:text-xl animate-fade-in-up animation-delay-300">
             LocAIte combines precise GPS tracking with predictive AI to not only show you where your things are, but where they're likely to be.
           </p>
-          <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex flex-col gap-4 sm:flex-row animate-fade-in-up animation-delay-600">
             <Button size="lg" asChild className="group bg-accent text-accent-foreground shadow-lg transition-all duration-300 hover:bg-accent/90 hover:shadow-xl hover:-translate-y-1">
               <Link href="/signup">
                 Get Started Free
