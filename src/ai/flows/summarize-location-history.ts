@@ -40,7 +40,10 @@ const prompt = ai.definePrompt({
   The user wants a summary of the location history over the specified time period.
 
   Time Period: {{{timePeriod}}}
-  Location History: {{JSON.stringify(locationHistory)}}
+  Location History:
+  {{#each locationHistory}}
+  - Latitude: {{{latitude}}}, Longitude: {{{longitude}}}, Timestamp: {{{timestamp}}}
+  {{/each}}
 
   Please provide a concise summary of the location history, highlighting the most frequent locations and the overall movement patterns.
   `,
