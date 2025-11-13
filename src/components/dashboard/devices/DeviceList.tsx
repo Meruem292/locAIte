@@ -1,13 +1,21 @@
+'use client';
+import { useState } from "react";
 import type { Device } from "@/lib/devices";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { HardDrive, Edit, Trash2 } from "lucide-react";
+import { AddEditDeviceDialog } from "./AddEditDeviceDialog";
+import { DeleteDeviceDialog } from "./DeleteDeviceDialog";
+
 
 type DeviceListProps = {
   devices: Device[];
 };
 
 export function DeviceList({ devices }: DeviceListProps) {
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+  const [deletingDevice, setDeletingDevice] = useState<Device | null>(null);
+
   return (
     <div className="space-y-4">
       {devices.map((device) => (
@@ -21,11 +29,11 @@ export function DeviceList({ devices }: DeviceListProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => setEditingDevice(device)}>
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Edit Device</span>
               </Button>
-              <Button variant="destructive" size="icon">
+              <Button variant="destructive" size="icon" onClick={() => setDeletingDevice(device)}>
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Delete Device</span>
               </Button>
@@ -33,6 +41,22 @@ export function DeviceList({ devices }: DeviceListProps) {
           </CardHeader>
         </Card>
       ))}
+
+      {editingDevice && (
+        <AddEditDeviceDialog 
+          isOpen={!!editingDevice}
+          onOpenChange={(isOpen) => !isOpen && setEditingDevice(null)}
+          device={editingDevice}
+        />
+      )}
+
+      {deletingDevice && (
+        <DeleteDeviceDialog
+          isOpen={!!deletingDevice}
+          onOpenChange={(isOpen) => !isOpen && setDeletingDevice(null)}
+          device={deletingDevice}
+        />
+      )}
     </div>
   );
 }
