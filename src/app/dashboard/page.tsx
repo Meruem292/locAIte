@@ -13,27 +13,13 @@ export default function DashboardPage() {
   // We will leave the emergency contacts here for now.
 
   return (
-    <div className="grid gap-8 md:grid-cols-3">
-      <div className="md:col-span-1">
-        <Card>
-          <CardHeader>
-            <CardTitle>Live Device Sync</CardTitle>
-            <CardDescription>
-              Connect to a nearby device to sync live location data.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <BluetoothConnector />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="md:col-span-2">
+    <div className="grid gap-8">
+      <div className="md:col-span-3">
         <Card>
           <CardHeader>
             <CardTitle>Welcome to LocAIte</CardTitle>
             <CardDescription>
-              Select a device to view its details and AI insights, or connect to
-              a live tracker.
+              Select a device to view its details and AI insights.
             </CardDescription>
           </CardHeader>
           <CardContent>
