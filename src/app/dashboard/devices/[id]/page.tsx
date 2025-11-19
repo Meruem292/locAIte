@@ -7,12 +7,14 @@ import { useCollection } from "@/firebase/firestore/use-collection";
 import type { Device } from "@/lib/devices";
 import type { Location } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { Loader2, HardDrive, ArrowLeft } from "lucide-react";
+import { Loader2, HardDrive, ArrowLeft, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { use, useMemo } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapEmbed } from "@/components/dashboard/devices/MapEmbed";
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
@@ -36,6 +38,7 @@ function DeviceDetailClient({ id }: { id: string }) {
 
     const { data: locations, loading: locationsLoading } = useCollection<Location>(locationsQuery, { idField: 'id' });
 
+    const latestLocation = locations && locations.length > 0 ? locations[0] : null;
 
     if (deviceLoading || locationsLoading) {
         return (
@@ -66,6 +69,29 @@ function DeviceDetailClient({ id }: { id: string }) {
                             <p className="text-sm text-muted-foreground font-mono">{device?.id}</p>
                         </div>
                     </div>
+                     {latestLocation ? (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <MapPin className="h-5 w-5 text-primary" />
+                                    <span>Live Location</span>
+                                </CardTitle>
+                                <CardDescription>The most recent location reported by the device.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="aspect-video w-full p-0">
+                                 <MapEmbed
+                                    latitude={latestLocation.latitude}
+                                    longitude={latestLocation.longitude}
+                                />
+                            </CardContent>
+                        </Card>
+                    ) : (
+                         <Card className="flex flex-col items-center justify-center text-center border-2 border-dashed border-border p-12 h-64">
+                            <MapPin className="w-12 h-12 text-muted-foreground" />
+                            <h3 className="mt-4 text-lg font-semibold">No Live Location Available</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">The device has not reported a location yet.</p>
+                        </Card>
+                    )}
                     <LocationHistoryTable deviceId={id} />
                 </div>
                  <div className="lg:col-span-1">
