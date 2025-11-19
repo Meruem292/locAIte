@@ -6,9 +6,8 @@ type MapEmbedProps = {
 };
 
 export function MapEmbed({ latitude, longitude }: MapEmbedProps) {
-    // This uses a query parameter 'q' to center the map, which works without an API key for basic embeds.
-    // The 'pb' parameter is complex and not necessary for just showing a location.
-    const mapSrc = `https://maps.google.com/maps?q=${latitude},${longitude}&hl=en&z=14&output=embed`;
+    // This uses a query parameter 'q' to center the map, and 't=k' for satellite view.
+    const mapSrc = `https://maps.google.com/maps?q=${latitude},${longitude}&hl=en&z=14&t=k&output=embed`;
 
     return (
         <iframe
