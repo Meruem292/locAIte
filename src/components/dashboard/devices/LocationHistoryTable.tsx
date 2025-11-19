@@ -28,22 +28,9 @@ type LocationHistoryTableProps = {
 
 const PAGE_SIZE = 5;
 
-async function getAddressFromCoordinates(lat: number, lon: number): Promise<string> {
-    try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-        const data = await response.json();
-        return data.display_name || 'Address not found';
-    } catch (error) {
-        console.error("Error fetching address:", error);
-        return 'Could not fetch address';
-    }
-}
-
-
 export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
     const firestore = useFirestore();
     const { toast } = useToast();
-    const [isAdding, setIsAdding] = useState(false);
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [firstVisible, setFirstVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -144,38 +131,6 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
     };
 
 
-    const handleAddDummyEntry = async () => {
-        if (!firestore) return;
-
-        setIsAdding(true);
-        try {
-            const lat = 14.3107 + (Math.random() - 0.5) * 0.01;
-            const lon = 120.9630 + (Math.random() - 0.5) * 0.01;
-            
-            const address = await getAddressFromCoordinates(lat, lon);
-
-            await addDoc(collection(firestore, 'locations'), {
-                deviceId: deviceId,
-                latitude: lat,
-                longitude: lon,
-                address: address,
-                timestamp: serverTimestamp(),
-            });
-            toast({
-                title: 'Dummy Location Added',
-                description: `A new location entry has been created for device ${deviceId}.`,
-            });
-        } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Error Adding Entry',
-                description: error.message || 'Could not add the dummy location.',
-            });
-        } finally {
-            setIsAdding(false);
-        }
-    };
-
     const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'N/A';
         if (timestamp instanceof Timestamp) {
@@ -196,17 +151,13 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
     return (
         <Dialog onOpenChange={(open) => !open && setSelectedLocation(null)}>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader>
                     <div>
                         <CardTitle>Location History</CardTitle>
                         <CardDescription>
                             Recent location updates from this device.
                         </CardDescription>
                     </div>
-                    <Button onClick={handleAddDummyEntry} disabled={isAdding} size="sm" variant="outline">
-                        {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                        Add Dummy Entry
-                    </Button>
                 </CardHeader>
                 <CardContent>
                     {isLoading && (
