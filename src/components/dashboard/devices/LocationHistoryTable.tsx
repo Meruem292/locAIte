@@ -80,21 +80,23 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
 
             if (documentSnapshots.docs.length > 0) {
                 setFirstVisible(documentSnapshots.docs[0]);
-                setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+                const lastDoc = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+                setLastVisible(lastDoc);
+
+                // Check if it's the last page
+                if (baseQuery) {
+                    const nextQuery = query(baseQuery, startAfter(lastDoc), limit(1));
+                    const nextSnap = await getDocs(nextQuery);
+                    setIsLastPage(nextSnap.empty);
+                }
             } else {
-                 if (page > 1) { // If we are on a page > 1 and it has no results, it means we overshot.
+                if (page > 1) { // If we are on a page > 1 and it has no results, it means we overshot.
                     setIsLastPage(true);
                 } else { // If page 1 has no results, there is no data.
                     setFirstVisible(null);
                     setLastVisible(null);
+                    setIsLastPage(true); // No data means it's the last page
                 }
-            }
-
-             // Check if it's the last page
-            if (baseQuery) {
-                const nextQuery = query(baseQuery, startAfter(documentSnapshots.docs[documentSnapshots.docs.length - 1]), limit(1));
-                const nextSnap = await getDocs(nextQuery);
-                setIsLastPage(nextSnap.empty);
             }
 
         } catch (error) {
