@@ -1,7 +1,7 @@
 'use client';
 
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { collection, query, orderBy, where, addDoc, serverTimestamp, Timestamp, limit, startAfter, endBefore, limitToLast, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { collection, query, orderBy, where, addDoc, serverTimestamp, Timestamp, limit, startAfter, endBefore, limitToLast, getDocs, QueryDocumentSnapshot, DocumentData, onSnapshot } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { useMemo, useState, useEffect } from 'react';
 import type { Location } from '@/lib/data';
@@ -62,75 +62,85 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
         );
     }, [firestore, deviceId]);
 
-    const fetchLocations = async (q: any) => {
-        if (!q) {
-            setLocations([]);
-            setIsLoading(false);
-            return;
-        }
+    const handleSnapshot = (documentSnapshots: any) => {
+        const newLocations: Location[] = [];
+        documentSnapshots.forEach((doc: any) => {
+            newLocations.push({ id: doc.id, ...(doc.data() as Omit<Location, 'id'>) });
+        });
+        setLocations(newLocations);
 
-        setIsLoading(true);
-        try {
-            const documentSnapshots = await getDocs(q);
-            const newLocations: Location[] = [];
-            documentSnapshots.forEach((doc) => {
-                newLocations.push({ id: doc.id, ...(doc.data() as Omit<Location, 'id'>) });
-            });
-            setLocations(newLocations);
+        if (documentSnapshots.docs.length > 0) {
+            setFirstVisible(documentSnapshots.docs[0]);
+            const lastDoc = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+            setLastVisible(lastDoc);
 
-            if (documentSnapshots.docs.length > 0) {
-                setFirstVisible(documentSnapshots.docs[0]);
-                const lastDoc = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-                setLastVisible(lastDoc);
-
-                // Check if it's the last page
-                if (baseQuery) {
-                    const nextQuery = query(baseQuery, startAfter(lastDoc), limit(1));
-                    const nextSnap = await getDocs(nextQuery);
-                    setIsLastPage(nextSnap.empty);
-                }
+            if (page > 1) {
+                 setIsFirstPage(false);
             } else {
-                if (page > 1) { // If we are on a page > 1 and it has no results, it means we overshot.
-                    setIsLastPage(true);
-                } else { // If page 1 has no results, there is no data.
-                    setFirstVisible(null);
-                    setLastVisible(null);
-                    setIsLastPage(true); // No data means it's the last page
-                }
+                setIsFirstPage(true);
             }
 
-        } catch (error) {
-            console.error("Error fetching locations:", error);
-            toast({ variant: 'destructive', title: 'Error fetching data' });
-        } finally {
-            setIsLoading(false);
+            // Check if it's the last page
+            if (baseQuery) {
+                const nextQuery = query(baseQuery, startAfter(lastDoc), limit(1));
+                getDocs(nextQuery).then(nextSnap => {
+                     setIsLastPage(nextSnap.empty);
+                });
+            }
+        } else {
+            setFirstVisible(null);
+            setLastVisible(null);
+            if (page > 1) { 
+                setIsLastPage(true);
+            } else {
+                setIsLastPage(true);
+                setIsFirstPage(true);
+            }
         }
-    };
+        setIsLoading(false);
+    }
     
     useEffect(() => {
-        if (baseQuery) {
-            fetchLocations(query(baseQuery, limit(PAGE_SIZE)));
-            setPage(1);
-            setIsFirstPage(true);
-        }
+        if (!baseQuery) return;
+
+        setIsLoading(true);
+        const q = query(baseQuery, limit(PAGE_SIZE));
+        const unsubscribe = onSnapshot(q, handleSnapshot, (error) => {
+            console.error("Error fetching locations:", error);
+            toast({ variant: 'destructive', title: 'Error fetching data' });
+            setIsLoading(false);
+        });
+
+        setPage(1);
+
+        return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [baseQuery]);
 
+
+    const fetchPage = async (q: any) => {
+        setIsLoading(true);
+        try {
+            const documentSnapshots = await getDocs(q);
+            handleSnapshot(documentSnapshots);
+        } catch (error) {
+            console.error("Error fetching locations:", error);
+            toast({ variant: 'destructive', title: 'Error fetching data' });
+            setIsLoading(false);
+        }
+    }
+
+
     const fetchNextPage = () => {
         if (!lastVisible || !baseQuery) return;
-        fetchLocations(query(baseQuery, startAfter(lastVisible), limit(PAGE_SIZE)));
+        fetchPage(query(baseQuery, startAfter(lastVisible), limit(PAGE_SIZE)));
         setPage(prev => prev + 1);
-        setIsFirstPage(false);
     };
 
     const fetchPrevPage = () => {
         if (!firstVisible || !baseQuery) return;
-        fetchLocations(query(baseQuery, endBefore(firstVisible), limitToLast(PAGE_SIZE)));
+        fetchPage(query(baseQuery, endBefore(firstVisible), limitToLast(PAGE_SIZE)));
         setPage(prev => prev - 1);
-        setIsLastPage(false);
-        if (page - 1 === 1) {
-            setIsFirstPage(true);
-        }
     };
 
 
@@ -151,9 +161,6 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                 address: address,
                 timestamp: serverTimestamp(),
             });
-             if (baseQuery && page === 1) {
-                fetchLocations(query(baseQuery, limit(PAGE_SIZE)));
-            }
             toast({
                 title: 'Dummy Location Added',
                 description: `A new location entry has been created for device ${deviceId}.`,
@@ -270,7 +277,7 @@ export function LocationHistoryTable({ deviceId }: LocationHistoryTableProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={fetchNextPage}
-                                disabled={isLastPage || isLoading || locations.length < PAGE_SIZE}
+                                disabled={isLastPage || isLoading}
                             >
                                 Next
                                 <ChevronRight className="h-4 w-4 ml-1" />
