@@ -80,6 +80,6 @@ function DeviceDetailClient({ id }: { id: string }) {
 
 
 export default function DeviceDetailPage({ params }: { params: { id: string }}) {
-    const resolvedParams = use(Promise.resolve(params));
+    const resolvedParams = use(params);
     return <DeviceDetailClient id={resolvedParams.id} />;
 }
