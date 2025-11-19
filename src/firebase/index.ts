@@ -7,9 +7,9 @@ import { Firestore, getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 
 import { useUser } from '@/firebase/auth/use-user';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 import {
   FirebaseProvider,
-  FirebaseClientProvider,
   useFirebase,
   useFirebaseApp,
   useFirestore,
