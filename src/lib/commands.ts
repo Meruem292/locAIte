@@ -1,8 +1,9 @@
-import { collection, addDoc, serverTimestamp, type Firestore } from "firebase/firestore";
+import { ref, push, serverTimestamp, type Database } from "firebase/database";
 
-export async function sendBuzzerCommand(firestore: Firestore, deviceId: string) {
+export async function sendBuzzerCommand(database: Database, deviceId: string) {
   try {
-    await addDoc(collection(firestore, 'commands'), {
+    const commandsRef = ref(database, 'commands');
+    await push(commandsRef, {
       deviceId: deviceId,
       buzzer: true,
       createdAt: serverTimestamp(),

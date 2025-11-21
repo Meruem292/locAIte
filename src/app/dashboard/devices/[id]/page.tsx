@@ -1,6 +1,6 @@
 'use client';
 
-import { useFirestore } from "@/firebase";
+import { useFirestore, useDatabase } from "@/firebase";
 import { doc, collection, query, where, orderBy, limit } from "firebase/firestore";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { useCollection } from "@/firebase/firestore/use-collection";
@@ -10,7 +10,7 @@ import { notFound, useParams } from "next/navigation";
 import { Loader2, HardDrive, ArrowLeft, MapPin, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { use, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
+    const database = useDatabase();
     const { toast } = useToast();
     const [isRinging, setIsRinging] = useState(false);
     
@@ -45,10 +46,10 @@ function DeviceDetailClient({ id }: { id: string }) {
     const latestLocation = locations && locations.length > 0 ? locations[0] : null;
 
     const handleRingDevice = async () => {
-        if (!firestore || !device) return;
+        if (!database || !device) return;
         setIsRinging(true);
         try {
-            await sendBuzzerCommand(firestore, device.id);
+            await sendBuzzerCommand(database, device.id);
             toast({
                 title: "Command Sent",
                 description: `Sent alarm command to ${device.name}.`,
@@ -136,6 +137,6 @@ function DeviceDetailClient({ id }: { id: string }) {
 
 
 export default function DeviceDetailPage({ params }: { params: { id: string }}) {
-    const resolvedParams = use(params);
+    const resolvedParams = React.use(params);
     return <DeviceDetailClient id={resolvedParams.id} />;
 }

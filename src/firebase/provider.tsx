@@ -11,12 +11,14 @@ import {
 import { FirebaseApp } from 'firebase/app';
 import { Auth } from 'firebase/auth';
 import { Firestore } from 'firebase/firestore';
+import { Database } from 'firebase/database';
 import { useUser } from '@/firebase/auth/use-user';
 
 type FirebaseContextValue = {
   app: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
+  database: Database;
 };
 
 const FirebaseContext = createContext<FirebaseContextValue | undefined>(
@@ -32,15 +34,16 @@ const FirebaseProvider = memo(function FirebaseProvider({
   children,
   value,
 }: FirebaseProviderProps) {
-  const { auth, firestore, app } = value;
+  const { auth, firestore, app, database } = value;
 
   const contextValue = useMemo(
     () => ({
       app,
       auth,
       firestore,
+      database,
     }),
-    [app, auth, firestore]
+    [app, auth, firestore, database]
   );
 
   return (
@@ -75,10 +78,16 @@ function useFirestore() {
   return firestore;
 }
 
+function useDatabase() {
+  const { database } = useFirebase();
+  return database;
+}
+
 export {
   FirebaseProvider,
   useFirebase,
   useFirebaseApp,
   useAuth,
   useFirestore,
+  useDatabase,
 };
