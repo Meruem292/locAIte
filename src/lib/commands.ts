@@ -1,12 +1,11 @@
-import { ref, push, serverTimestamp, type Database } from "firebase/database";
+import { ref, set, serverTimestamp, type Database } from "firebase/database";
 
 export async function sendBuzzerCommand(database: Database, deviceId: string) {
   try {
-    const commandsRef = ref(database, 'commands');
-    await push(commandsRef, {
-      deviceId: deviceId,
+    const commandRef = ref(database, `commands/${deviceId}`);
+    await set(commandRef, {
       buzzer: true,
-      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
     console.error("Error sending buzzer command: ", error);
