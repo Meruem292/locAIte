@@ -3,7 +3,7 @@
 import { Logo } from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, Sun, Moon } from "lucide-react";
+import { LogOut, Settings, Sun, Moon, RadioTower } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import { LayoutDashboard, HardDrive } from "lucide-react";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/devices", label: "Devices", icon: HardDrive },
+  { href: "/dashboard/find", label: "Find", icon: RadioTower },
 ];
 
 

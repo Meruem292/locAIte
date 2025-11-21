@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, HardDrive } from 'lucide-react';
+import { LayoutDashboard, HardDrive, RadioTower } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/devices', label: 'Devices', icon: HardDrive },
+  { href: '/dashboard/find', label: 'Find', icon: RadioTower },
 ];
 
 export function MobileBottomNav() {
@@ -15,7 +16,7 @@ export function MobileBottomNav() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t">
-      <div className="grid h-full max-w-lg grid-cols-2 mx-auto font-medium">
+      <div className="grid h-full max-w-lg grid-cols-3 mx-auto font-medium">
         {navItems.map((item) => {
           const isActive = (pathname.startsWith(item.href) && item.href !== '/dashboard') || pathname === item.href;
           return (
