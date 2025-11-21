@@ -5,16 +5,18 @@ import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import type { Device } from '@/lib/devices';
 import type { Location } from '@/lib/data';
 import { useMemo, useState } from 'react';
-import { Loader2, RadioTower, Sparkles, HardDrive, Wifi, Smartphone } from 'lucide-react';
+import { Loader2, RadioTower, Sparkles, HardDrive, Wifi, Smartphone, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AiInsights } from '@/components/dashboard/AiInsights';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 
 export default function FindMyDevicePage() {
   const { user } = useAuth();
   const firestore = useFirestore();
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const devicesQuery = useMemo(() => {
     if (!user || !firestore) return null;
@@ -69,7 +71,15 @@ export default function FindMyDevicePage() {
                             <li>Configure the hotspot with the following details:</li>
                             <ul>
                                 <li><strong>SSID (Network Name):</strong> <code>{selectedDeviceId ? selectedDeviceId : '<Your-Device-ID>'}</code></li>
-                                <li><strong>Password:</strong> <code>pass_locaite</code></li>
+                                <li>
+                                  <div className="flex items-center gap-2">
+                                     <strong>Password:</strong>
+                                      <code className="font-mono">{showPassword ? 'pass_locaite' : '••••••••••••'}</code>
+                                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                      </Button>
+                                  </div>
+                                </li>
                             </ul>
                             <li>If the device is within range of your hotspot, it will automatically connect and send its latest location, which will then appear on the map.</li>
                         </ol>
