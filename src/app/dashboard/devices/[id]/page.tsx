@@ -6,7 +6,7 @@ import { useDoc } from "@/firebase/firestore/use-doc";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import type { Device } from "@/lib/devices";
 import type { Location } from "@/lib/data";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Loader2, HardDrive, ArrowLeft, MapPin, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -17,16 +17,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MapEmbed } from "@/components/dashboard/devices/MapEmbed";
 import { sendBuzzerCommand } from "@/lib/commands";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
     const database = useDatabase();
     const { toast } = useToast();
     const [isRinging, setIsRinging] = useState(false);
-    
+
     const deviceRef = useMemo(() => {
         if (!firestore) return null;
         return doc(firestore, 'devices', id);
@@ -47,16 +44,21 @@ function DeviceDetailClient({ id }: { id: string }) {
     const { data: locations, loading: locationsLoading } = useCollection<Location>(locationsQuery, { idField: 'id' });
 
     const latestLocation = locations && locations.length > 0 ? locations[0] : null;
-
-    const handleAlarmToggle = async (checked: boolean) => {
+    
+    const handleAlarmClick = async () => {
         if (!database || !device) return;
-        setIsRinging(checked);
+        setIsRinging(true);
         try {
-            await sendBuzzerCommand(database, device.id, checked);
+            await sendBuzzerCommand(database, device.id, true);
             toast({
                 title: "Command Sent",
-                description: `Alarm for ${device.name} has been ${checked ? 'activated' : 'deactivated'}.`,
+                description: `Alarm command sent to ${device.name}.`,
             });
+            // Turn off the ringing state in UI after a short delay
+            setTimeout(() => {
+                sendBuzzerCommand(database, device.id, false);
+                setIsRinging(false);
+            }, 3000); // Ring for 3 seconds
         } catch (error) {
             console.error("Error sending command:", error);
             toast({
@@ -64,10 +66,10 @@ function DeviceDetailClient({ id }: { id: string }) {
                 title: "Error",
                 description: `Failed to send command.`,
             });
-            // Revert state if command fails
-            setIsRinging(!checked);
+            setIsRinging(false);
         }
     }
+
 
     if (deviceLoading || locationsLoading) {
         return (
@@ -99,17 +101,10 @@ function DeviceDetailClient({ id }: { id: string }) {
                                 <p className="text-sm text-muted-foreground font-mono">{device?.id}</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                           <Switch
-                                id="alarm-switch"
-                                checked={isRinging}
-                                onCheckedChange={handleAlarmToggle}
-                                aria-label="Alarm switch"
-                            />
-                            <Label htmlFor="alarm-switch" className="flex flex-col">
-                                <span className="font-semibold">{isRinging ? 'Alarm ON' : 'Alarm OFF'}</span>
-                            </Label>
-                        </div>
+                         <Button onClick={handleAlarmClick} disabled={isRinging} variant="destructive">
+                            <Bell />
+                            {isRinging ? 'Alarming...' : 'Alarm Device'}
+                        </Button>
                     </div>
                      {latestLocation ? (
                         <Card>
