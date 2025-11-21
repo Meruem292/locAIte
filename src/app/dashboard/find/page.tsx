@@ -65,7 +65,7 @@ export default function FindMyDevicePage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="prose prose-sm max-w-none text-foreground/80">
-                        <p>If your device is out of Bluetooth range but might be in an area with Wi-Fi, you can use your phone's hotspot to help it connect and report its location.</p>
+                        <p>If your device is in an area with Wi-Fi, you can use your phone's hotspot to help it connect and report its location.</p>
                         <ol>
                             <li>Turn on your phone’s hotspot while connected to the internet (Wi-Fi or mobile data).</li>
                             <li>Configure the hotspot with the following details:</li>
