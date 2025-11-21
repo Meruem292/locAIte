@@ -77,18 +77,17 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
     .split(/\d+\.\s/)
     .filter(step => step.trim() !== '');
 
-  return (
-    <Card className="sticky top-24 shadow-sm border">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <CardTitle className="font-headline">AI Insights</CardTitle>
+  if (!hasHistory) {
+    return (
+        <div className="flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-lg p-12 h-60">
+            <h3 className="text-lg font-semibold">Not Enough Data</h3>
+            <p className="mt-1 text-sm text-muted-foreground">This device has no location history to analyze.</p>
         </div>
-        <CardDescription>
-          {!hasHistory ? "No location history available for AI analysis." : "Understand your tag's patterns with AI."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-6 space-y-6">
+    )
+  }
+
+  return (
+    <div className="space-y-6">
         <div>
           <h4 className="font-semibold mb-3 flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground"/> Location Summary</h4>
           <Button onClick={handleSummarize} disabled={isSummaryLoading || !hasHistory} className="w-full" variant="secondary">
@@ -171,7 +170,6 @@ export function AiInsights({ deviceId, locationHistory }: AiInsightsProps) {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
   );
 }
