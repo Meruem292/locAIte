@@ -5,10 +5,11 @@ import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import type { Device } from '@/lib/devices';
 import type { Location } from '@/lib/data';
 import { useMemo, useState } from 'react';
-import { Loader2, RadioTower, Sparkles, HardDrive } from 'lucide-react';
+import { Loader2, RadioTower, Sparkles, HardDrive, Wifi, Smartphone } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AiInsights } from '@/components/dashboard/AiInsights';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function FindMyDevicePage() {
   const { user } = useAuth();
@@ -41,9 +42,58 @@ export default function FindMyDevicePage() {
       <div>
         <h1 className="text-3xl font-bold font-headline text-primary">Find & Analyze</h1>
         <p className="text-muted-foreground">
-          Use AI to predict your device's location based on its history.
+          Use AI and other methods to predict and find your device's location.
         </p>
       </div>
+
+       <Card>
+        <CardHeader>
+            <CardTitle>How to Find Your Device</CardTitle>
+            <CardDescription>
+                Use the methods below to locate your device, whether it's far away or nearby.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                        <div className="flex items-center gap-3">
+                            <Smartphone className="h-5 w-5 text-primary" />
+                            <span>Phone Hotspot Method (for remote location)</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="prose prose-sm max-w-none text-foreground/80">
+                        <p>If your device is out of Bluetooth range but might be in an area with Wi-Fi, you can use your phone's hotspot to help it connect and report its location.</p>
+                        <ol>
+                            <li>Turn on your phone’s hotspot while connected to the internet (Wi-Fi or mobile data).</li>
+                            <li>Configure the hotspot with the following details:</li>
+                            <ul>
+                                <li><strong>SSID (Network Name):</strong> <code>{selectedDeviceId ? selectedDeviceId : '<Your-Device-ID>'}</code></li>
+                                <li><strong>Password:</strong> <code>pass_locaite</code></li>
+                            </ul>
+                            <li>If the device is within range of your hotspot, it will automatically connect and send its latest location, which will then appear on the map.</li>
+                        </ol>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                         <div className="flex items-center gap-3">
+                            <Wifi className="h-5 w-5 text-primary" />
+                            <span>Wi-Fi Scanning Method (for nearby location)</span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="prose prose-sm max-w-none text-foreground/80">
+                         <p>When your device can't connect to a known Wi-Fi network, it enters Access Point (AP) mode. You can scan for its signal to confirm if it's nearby.</p>
+                         <ol>
+                            <li>Open your phone’s Wi-Fi settings and scan for nearby networks.</li>
+                            <li>Look for an Access Point whose name is the same as your device ID (e.g., <strong>{selectedDeviceId ? selectedDeviceId : 'L-001'}</strong>).</li>
+                            <li>If this network appears in your scan, it means the device is powered on and likely very close to your current location. You can then try to find it manually.</li>
+                         </ol>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </CardContent>
+       </Card>
 
       <Card>
           <CardHeader>
@@ -52,7 +102,7 @@ export default function FindMyDevicePage() {
                   <CardTitle>AI Location Analysis</CardTitle>
               </div>
           <CardDescription>
-              Select a device to analyze its location history and predict where it might be.
+              Select a device to analyze its location history and predict where it might be. This is useful for backtracking to identify the possible location of the device.
           </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
