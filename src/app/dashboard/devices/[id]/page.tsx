@@ -17,6 +17,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MapEmbed } from "@/components/dashboard/devices/MapEmbed";
 import { sendBuzzerCommand } from "@/lib/commands";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
@@ -45,14 +48,14 @@ function DeviceDetailClient({ id }: { id: string }) {
 
     const latestLocation = locations && locations.length > 0 ? locations[0] : null;
 
-    const handleRingDevice = async () => {
+    const handleAlarmToggle = async (checked: boolean) => {
         if (!database || !device) return;
-        setIsRinging(true);
+        setIsRinging(checked);
         try {
-            await sendBuzzerCommand(database, device.id);
+            await sendBuzzerCommand(database, device.id, checked);
             toast({
                 title: "Command Sent",
-                description: `Sent alarm command to ${device.name}.`,
+                description: `Alarm for ${device.name} has been ${checked ? 'activated' : 'deactivated'}.`,
             });
         } catch (error) {
             console.error("Error sending command:", error);
@@ -61,8 +64,9 @@ function DeviceDetailClient({ id }: { id: string }) {
                 title: "Error",
                 description: `Failed to send command.`,
             });
+            // Revert state if command fails
+            setIsRinging(!checked);
         }
-        setTimeout(() => setIsRinging(false), 3000); // Visual feedback for 3s
     }
 
     if (deviceLoading || locationsLoading) {
@@ -95,10 +99,17 @@ function DeviceDetailClient({ id }: { id: string }) {
                                 <p className="text-sm text-muted-foreground font-mono">{device?.id}</p>
                             </div>
                         </div>
-                        <Button onClick={handleRingDevice} disabled={isRinging} variant="destructive">
-                            <Bell className="mr-2 h-4 w-4" />
-                            {isRinging ? 'Alarming...' : 'Alarm Device'}
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                           <Switch
+                                id="alarm-switch"
+                                checked={isRinging}
+                                onCheckedChange={handleAlarmToggle}
+                                aria-label="Alarm switch"
+                            />
+                            <Label htmlFor="alarm-switch" className="flex flex-col">
+                                <span className="font-semibold">{isRinging ? 'Alarm ON' : 'Alarm OFF'}</span>
+                            </Label>
+                        </div>
                     </div>
                      {latestLocation ? (
                         <Card>
