@@ -6,18 +6,22 @@ import { useDoc } from "@/firebase/firestore/use-doc";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import type { Device } from "@/lib/devices";
 import type { Location } from "@/lib/data";
-import { notFound } from "next/navigation";
-import { Loader2, HardDrive, ArrowLeft, MapPin } from "lucide-react";
+import { notFound, useParams } from "next/navigation";
+import { Loader2, HardDrive, ArrowLeft, MapPin, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { use, useMemo } from "react";
+import { use, useMemo, useState } from "react";
 import { AiInsights } from "@/components/dashboard/AiInsights";
 import { LocationHistoryTable } from "@/components/dashboard/devices/LocationHistoryTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapEmbed } from "@/components/dashboard/devices/MapEmbed";
+import { sendBuzzerCommand } from "@/lib/commands";
+import { useToast } from "@/hooks/use-toast";
 
 function DeviceDetailClient({ id }: { id: string }) {
     const firestore = useFirestore();
+    const { toast } = useToast();
+    const [isRinging, setIsRinging] = useState(false);
     
     const deviceRef = useMemo(() => {
         if (!firestore) return null;
@@ -39,6 +43,26 @@ function DeviceDetailClient({ id }: { id: string }) {
     const { data: locations, loading: locationsLoading } = useCollection<Location>(locationsQuery, { idField: 'id' });
 
     const latestLocation = locations && locations.length > 0 ? locations[0] : null;
+
+    const handleRingDevice = async () => {
+        if (!firestore || !device) return;
+        setIsRinging(true);
+        try {
+            await sendBuzzerCommand(firestore, device.id);
+            toast({
+                title: "Command Sent",
+                description: `Sent alarm command to ${device.name}.`,
+            });
+        } catch (error) {
+            console.error("Error sending command:", error);
+            toast({
+                variant: 'destructive',
+                title: "Error",
+                description: `Failed to send command.`,
+            });
+        }
+        setTimeout(() => setIsRinging(false), 3000); // Visual feedback for 3s
+    }
 
     if (deviceLoading || locationsLoading) {
         return (
@@ -62,12 +86,18 @@ function DeviceDetailClient({ id }: { id: string }) {
             </Button>
             <div className="grid gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2 space-y-8">
-                    <div className="flex items-center gap-4">
-                        <HardDrive className="w-10 h-10 text-primary" />
-                        <div>
-                            <h1 className="text-3xl font-bold font-headline text-primary">{device?.name}</h1>
-                            <p className="text-sm text-muted-foreground font-mono">{device?.id}</p>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <HardDrive className="w-10 h-10 text-primary" />
+                            <div>
+                                <h1 className="text-3xl font-bold font-headline text-primary">{device?.name}</h1>
+                                <p className="text-sm text-muted-foreground font-mono">{device?.id}</p>
+                            </div>
                         </div>
+                        <Button onClick={handleRingDevice} disabled={isRinging} variant="destructive">
+                            <Bell className="mr-2 h-4 w-4" />
+                            {isRinging ? 'Alarming...' : 'Alarm Device'}
+                        </Button>
                     </div>
                      {latestLocation ? (
                         <Card>
