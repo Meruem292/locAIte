@@ -1,22 +1,28 @@
 'use client';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, useDatabase } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import type { Device } from '@/lib/devices';
 import type { Location } from '@/lib/data';
 import { useMemo, useState } from 'react';
-import { Loader2, RadioTower, Sparkles, HardDrive, Wifi, Smartphone, Eye, EyeOff } from 'lucide-react';
+import { Loader2, RadioTower, Sparkles, HardDrive, Wifi, Smartphone, Eye, EyeOff, Bell } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AiInsights } from '@/components/dashboard/AiInsights';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { sendBuzzerCommand } from '@/lib/commands';
 
 export default function FindMyDevicePage() {
   const { user } = useAuth();
   const firestore = useFirestore();
+  const database = useDatabase();
+  const { toast } = useToast();
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isRinging, setIsRinging] = useState(false);
+
 
   const devicesQuery = useMemo(() => {
     if (!user || !firestore) return null;
@@ -38,6 +44,31 @@ export default function FindMyDevicePage() {
   const { data: locations, loading: locationsLoading } = useCollection<Location>(locationsQuery, { idField: 'id' });
 
   const selectedDevice = devices?.find(d => d.id === selectedDeviceId);
+
+  const handleAlarmClick = async () => {
+      if (!database || !selectedDevice) return;
+      setIsRinging(true);
+      try {
+          await sendBuzzerCommand(database, selectedDevice.id, true);
+          toast({
+              title: "Command Sent",
+              description: `Alarm command sent to ${selectedDevice.name}.`,
+          });
+          // Turn off the ringing state in UI after a short delay
+          setTimeout(() => {
+              sendBuzzerCommand(database, selectedDevice.id, false);
+              setIsRinging(false);
+          }, 3000); // Ring for 3 seconds
+      } catch (error) {
+          console.error("Error sending command:", error);
+          toast({
+              variant: 'destructive',
+              title: "Error",
+              description: `Failed to send command.`,
+          });
+          setIsRinging(false);
+      }
+  }
 
   return (
     <div className="space-y-8">
@@ -107,9 +138,17 @@ export default function FindMyDevicePage() {
 
       <Card>
           <CardHeader>
-              <div className="flex items-center gap-3">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                  <CardTitle>AI Location Analysis</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                    <CardTitle>AI Location Analysis</CardTitle>
+                </div>
+                 {selectedDevice && (
+                    <Button onClick={handleAlarmClick} disabled={isRinging} variant="destructive">
+                        <Bell />
+                        {isRinging ? 'Alarming...' : 'Alarm Device'}
+                    </Button>
+                )}
               </div>
           <CardDescription>
               Select a device to analyze its location history and predict where it might be. This is useful for backtracking to identify the possible location of the device.
