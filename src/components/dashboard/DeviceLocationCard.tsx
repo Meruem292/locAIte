@@ -5,7 +5,7 @@ import type { Location } from '@/lib/data';
 import { useFirestore } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection, query, where, orderBy, limit } from 'firebase/firestore';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapEmbed } from '@/components/dashboard/devices/MapEmbed';
 import { Loader2, MapPin, HardDrive } from 'lucide-react';
@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { Timestamp } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 type DeviceLocationCardProps = {
   device: Device;
@@ -20,6 +21,7 @@ type DeviceLocationCardProps = {
 
 export function DeviceLocationCard({ device }: DeviceLocationCardProps) {
   const firestore = useFirestore();
+  const [isActive, setIsActive] = useState(false);
 
   const latestLocationQuery = useMemo(() => {
     if (!firestore) return null;
@@ -34,6 +36,28 @@ export function DeviceLocationCard({ device }: DeviceLocationCardProps) {
   const { data: locations, loading } = useCollection<Location>(latestLocationQuery);
   const latestLocation = locations?.[0];
 
+  useEffect(() => {
+    const checkStatus = () => {
+      if (latestLocation?.timestamp) {
+        const locationDate = latestLocation.timestamp instanceof Timestamp
+          ? latestLocation.timestamp.toDate()
+          : new Date(latestLocation.timestamp as string | number | Date);
+        
+        const now = new Date();
+        const diffInSeconds = (now.getTime() - locationDate.getTime()) / 1000;
+        setIsActive(diffInSeconds <= 30);
+      } else {
+        setIsActive(false);
+      }
+    };
+
+    checkStatus();
+    const interval = setInterval(checkStatus, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [latestLocation]);
+
+
   const formatTimestamp = (timestamp: any) => {
     if (!timestamp) return 'N/A';
     const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
@@ -43,9 +67,20 @@ export function DeviceLocationCard({ device }: DeviceLocationCardProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader>
-        <div className="flex items-center gap-3">
-            <HardDrive className="h-6 w-6 text-primary"/>
-            <CardTitle className="font-headline group-hover:underline">{device.name}</CardTitle>
+        <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3">
+                <HardDrive className="h-6 w-6 text-primary"/>
+                <CardTitle className="font-headline group-hover:underline">{device.name}</CardTitle>
+            </div>
+             <div className="flex items-center gap-2 text-sm">
+                <span className={cn(
+                    "h-2 w-2 rounded-full",
+                    isActive ? "bg-green-500 animate-pulse" : "bg-muted-foreground"
+                )}></span>
+                <span className={cn(isActive ? "text-green-600 font-semibold" : "text-muted-foreground")}>
+                    {isActive ? 'Active' : 'Inactive'}
+                </span>
+            </div>
         </div>
         <CardDescription className="font-mono text-xs !mt-1">{device.id}</CardDescription>
       </CardHeader>
